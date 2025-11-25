@@ -15,7 +15,7 @@ import customFetch from '@/utils/fetchWrapper'
 import { formatDate, getTwoFirstDecimals, getFiscalMonthRange } from '@/utils/utils'
 import { Info } from '@mui/icons-material'
 import { CircularProgress, Tooltip, useMediaQuery, Grid, Stack, Typography } from '@mui/material'
-import { CSSProperties, Suspense, useContext, useEffect, useState } from 'react'
+import { Suspense, useContext, useEffect, useState } from 'react'
 import '../styles.css'
 
 export default function Home() {
