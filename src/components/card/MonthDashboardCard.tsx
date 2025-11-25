@@ -25,7 +25,7 @@ export default function MonthDashboardCard() {
 
   const [title, setTitle] = useState<string>('Resumen del mes (semanas)')
   const [filter, setFilter] = useState('weekly')
-  const { monthsSelected, transactions, loadingTransactions, startDayOfMonth } = useContext(HomeContext)
+  const { monthsSelected, transactions, loadingTransactions } = useContext(HomeContext)
 
   // Check if the selected range represents approximately one fiscal month
   const areMonthsSelectedSameMonth = (() => {
