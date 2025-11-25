@@ -32,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }),
           // Añadir la condición para filtrar por categoría, cantidad y fecha si está presente
           ...(filtersJson && {
-            category: filtersJson.category ? { contains: filtersJson.category, mode: 'insensitive' } : undefined
+            category: filtersJson.category ? { contains: filtersJson.category, mode: 'insensitive' as const} : undefined
           })
         }
 
