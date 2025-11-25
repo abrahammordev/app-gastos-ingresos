@@ -14,13 +14,14 @@ interface HomeContextType {
   loadingTransactions: boolean;
   loadingBudgets: boolean;
   loadingBudgetHistorics: boolean;
+  startDayOfMonth?: number;
 }
 
 const defaultValue: HomeContextType = {
   monthsSelected: [dayjs().startOf('month').format('YYYY-MM-DD'), dayjs().endOf('month').format('YYYY-MM-DD')],
-  setMonthsSelected: () => {},
+  setMonthsSelected: () => { },
   budget: 0,
-  setBudget: () => {},
+  setBudget: () => { },
   transactions: null,
   budgets: null,
   budgetHistorics: null,

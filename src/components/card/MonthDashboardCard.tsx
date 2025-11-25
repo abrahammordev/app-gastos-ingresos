@@ -25,11 +25,16 @@ export default function MonthDashboardCard() {
 
   const [title, setTitle] = useState<string>('Resumen del mes (semanas)')
   const [filter, setFilter] = useState('weekly')
-  const { monthsSelected, transactions, loadingTransactions } = useContext(HomeContext)
+  const { monthsSelected, transactions, loadingTransactions, startDayOfMonth } = useContext(HomeContext)
 
-  const areMonthsSelectedSameMonth =
-    monthsSelected[0].split('-')[1] === monthsSelected[1].split('-')[1] &&
-    monthsSelected[0].split('-')[0] === monthsSelected[1].split('-')[0]
+  // Check if the selected range represents approximately one fiscal month
+  const areMonthsSelectedSameMonth = (() => {
+    const start = new Date(monthsSelected[0])
+    const end = new Date(monthsSelected[1])
+    const daysDiff = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+    // A single fiscal month is typically 28-31 days
+    return daysDiff >= 27 && daysDiff <= 32
+  })()
 
   const [data, setData] = useState<ISummaryChart[]>([])
 
@@ -104,10 +109,10 @@ export default function MonthDashboardCard() {
   const getMonthData = () => {
     const dataMap: Map<string, ISummaryChart> = new Map()
     const [startDate, endDate] = monthsSelected.map(date => {
-      const [year, month] = date.split('-').map(part => parseInt(part))
-      return new Date(Date.UTC(year, month - 1, 1, 0, 0))
+      const [year, month, day] = date.split('-').map(part => parseInt(part))
+      return new Date(Date.UTC(year, month - 1, day, 0, 0))
     })
-    const currentDate = startDate
+    const currentDate = new Date(startDate)
 
     while (currentDate <= endDate) {
       const key = formatMonthYear(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), 0, 0)

@@ -150,7 +150,8 @@ export default function Home() {
           budgetHistorics: budgetHistoricsData ? budgetHistoricsData.budgetHistorics : [],
           loadingTransactions,
           loadingBudgets,
-          loadingBudgetHistorics
+          loadingBudgetHistorics,
+          startDayOfMonth: settings?.startDayOfMonth ?? 1
         }}
       >
         <Suspense fallback={<CircularProgress />}>
