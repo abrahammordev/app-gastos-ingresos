@@ -123,9 +123,27 @@ export const getFiscalMonthRange = (year: number, month: number, startDay: numbe
     return [start.toISOString(), end.toISOString()]
   }
 
-  // Fiscal Month X (e.g., Nov) starts on Oct 25 and ends on Nov 24
-  const start = new Date(Date.UTC(year, month - 1, startDay, 0, 0))
-  const end = new Date(Date.UTC(year, month, startDay - 1, 23, 59))
+  // Fiscal Month X starts on day startDay of month X and ends on day (startDay - 1) of month X+1
+  // Example: Fiscal November with startDay=25 -> Nov 25 to Dec 24
+  const start = new Date(Date.UTC(year, month, startDay, 0, 0))
+  const end = new Date(Date.UTC(year, month + 1, startDay - 1, 23, 59))
   return [start.toISOString(), end.toISOString()]
+}
+
+export const getCurrentFiscalMonthRange = (startDay: number): [string, string] => {
+  const today = new Date()
+  const currentDay = today.getDate()
+  const currentMonth = today.getMonth()
+  const currentYear = today.getFullYear()
+
+  // If today's day is before the start day, we're still in the previous fiscal month
+  // Example: If startDay=25 and today is Nov 20, we're in the Oct 25 - Nov 24 fiscal month
+  if (currentDay < startDay) {
+    return getFiscalMonthRange(currentYear, currentMonth - 1, startDay)
+  }
+
+  // Otherwise, we're in the current fiscal month
+  // Example: If startDay=25 and today is Nov 25 or later, we're in the Nov 25 - Dec 24 fiscal month
+  return getFiscalMonthRange(currentYear, currentMonth, startDay)
 }
 

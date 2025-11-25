@@ -12,7 +12,7 @@ import useFetch from '@/hooks/useFetch'
 import useAppSettings from '@/hooks/useAppSettings'
 import { IBudgetHistorics, IBudgets, IMonthlyTransactions, ITransaction } from '@/types/index'
 import customFetch from '@/utils/fetchWrapper'
-import { formatDate, getTwoFirstDecimals, getFiscalMonthRange } from '@/utils/utils'
+import { formatDate, getTwoFirstDecimals, getCurrentFiscalMonthRange } from '@/utils/utils'
 import { Info } from '@mui/icons-material'
 import { CircularProgress, Tooltip, useMediaQuery, Grid, Stack, Typography } from '@mui/material'
 import { Suspense, useContext, useEffect, useState } from 'react'
@@ -30,7 +30,7 @@ export default function Home() {
   useEffect(() => {
     if (settings) {
       const startDay = settings.startDayOfMonth
-      const newRange = getFiscalMonthRange(today.getFullYear(), today.getMonth(), startDay)
+      const newRange = getCurrentFiscalMonthRange(startDay)
       setMonthsSelected(newRange)
     }
   }, [settings])
