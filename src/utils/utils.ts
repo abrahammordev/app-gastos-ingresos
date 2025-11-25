@@ -115,3 +115,17 @@ export const interpolateColor = (value: number, start: string, end: string): str
   const toHex = (n: number) => n.toString(16).padStart(2, '0')
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`
 }
+
+export const getFiscalMonthRange = (year: number, month: number, startDay: number): [string, string] => {
+  if (startDay === 1) {
+    const start = new Date(Date.UTC(year, month, 1, 0, 0))
+    const end = new Date(Date.UTC(year, month + 1, 0, 23, 59))
+    return [start.toISOString(), end.toISOString()]
+  }
+
+  // Fiscal Month X (e.g., Nov) starts on Oct 25 and ends on Nov 24
+  const start = new Date(Date.UTC(year, month - 1, startDay, 0, 0))
+  const end = new Date(Date.UTC(year, month, startDay - 1, 23, 59))
+  return [start.toISOString(), end.toISOString()]
+}
+

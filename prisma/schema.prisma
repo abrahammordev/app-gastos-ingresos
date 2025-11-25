@@ -49,3 +49,8 @@ model Category {
   Budgets       Budget[]
   BudgetHistorics BudgetHistoric[]
 }
+
+model AppSettings {
+  id             Int @id @default(autoincrement())
+  startDayOfMonth Int @default(1)
+}

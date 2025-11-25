@@ -16,6 +16,9 @@ import dayjs from 'dayjs'
 import { CSSProperties, SyntheticEvent, useCallback, useContext, useEffect, useState } from 'react'
 import '../../styles.css'
 import { formatDate, getTwoFirstDecimals } from '@/utils/utils'
+import useAppSettings from '@/hooks/useAppSettings'
+import BasicCard from '@/components/card/BasicCard'
+import { TextField, Button, Snackbar, Alert } from '@mui/material'
 
 export default function Settings() {
   const { refreshCategories: refreshAllCategories } = useContext(RefreshContext)
@@ -61,6 +64,25 @@ export default function Settings() {
 
   const [restingBudget, setRestingBudget] = useState<number>(0)
   const [value, setValue] = useState(0)
+
+  const { settings, updateSettings } = useAppSettings()
+  const [startDay, setStartDay] = useState<number>(1)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (settings) {
+      setStartDay(settings.startDayOfMonth)
+    }
+  }, [settings])
+
+  const handleSaveSettings = async () => {
+    try {
+      await updateSettings({ startDayOfMonth: startDay })
+      setSuccessMessage('Configuración guardada correctamente')
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   const refreshMonthlyIncomeTransactions = useCallback(
     (
@@ -453,6 +475,13 @@ export default function Settings() {
                     label="Categorías y presupuestos"
                     value={1}
                   />
+                  <Tab
+                    classes={{
+                      selected: 'tabSelected'
+                    }}
+                    label="General"
+                    value={2}
+                  />
                 </Tabs>
               </div>
               {value === 0 && (
@@ -481,6 +510,33 @@ export default function Settings() {
                   </div>
                 </div>
               )}
+              {value === 2 && (
+                <div style={containerStyle}>
+                  <div style={{ ...columnStyle, width: '100%' }}>
+                    <BasicCard style={{ width: '100%', padding: '20px' }}>
+                      <h3 style={titleStyle}>Configuración General</h3>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '300px' }}>
+                        <TextField
+                          label="Día de inicio del mes"
+                          type="number"
+                          InputProps={{ inputProps: { min: 1, max: 28 } }}
+                          value={startDay}
+                          onChange={(e) => setStartDay(parseInt(e.target.value))}
+                          helperText="Selecciona el día en que se reinicia el presupuesto (1-28)"
+                        />
+                        <Button variant="contained" color="primary" onClick={handleSaveSettings}>
+                          Guardar
+                        </Button>
+                      </div>
+                    </BasicCard>
+                  </div>
+                </div>
+              )}
+              <Snackbar open={!!successMessage} autoHideDuration={6000} onClose={() => setSuccessMessage(null)}>
+                <Alert onClose={() => setSuccessMessage(null)} severity="success" sx={{ width: '100%' }}>
+                  {successMessage}
+                </Alert>
+              </Snackbar>
             </SettingsBudgetsContext.Provider>
           </SettingsCategoriesContext.Provider>
         </SettingsMonthlyIncomeTransactionsContext.Provider>

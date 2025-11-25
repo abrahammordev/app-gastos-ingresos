@@ -9,21 +9,32 @@ import DownloadReportButton from '@/components/reports/DownloadReportButton'
 import { HomeContext } from '@/contexts/HomeContext'
 import { RefreshContext } from '@/contexts/RefreshContext'
 import useFetch from '@/hooks/useFetch'
+import useAppSettings from '@/hooks/useAppSettings'
 import theme from '@/theme'
 import { IBudgetHistorics, IBudgets, IMonthlyTransactions, ITransaction } from '@/types/index'
 import customFetch from '@/utils/fetchWrapper'
-import { formatDate, getTwoFirstDecimals } from '@/utils/utils'
+import { formatDate, getTwoFirstDecimals, getFiscalMonthRange } from '@/utils/utils'
 import { Info } from '@mui/icons-material'
-import { CircularProgress, Tooltip, useMediaQuery } from '@mui/material'
+import { CircularProgress, Tooltip, useMediaQuery, Grid, Stack, Typography } from '@mui/material'
 import { CSSProperties, Suspense, useContext, useEffect, useState } from 'react'
 import '../styles.css'
 
 export default function Home() {
   const today = new Date()
+  const { settings, loading: loadingSettings } = useAppSettings()
+
   const [monthsSelected, setMonthsSelected] = useState<[string, string]>([
     formatDate(today.getFullYear(), today.getMonth(), 1, 0, 0),
     formatDate(today.getFullYear(), today.getMonth() + 1, 0, 23, 59)
   ])
+
+  useEffect(() => {
+    if (settings) {
+      const startDay = settings.startDayOfMonth
+      const newRange = getFiscalMonthRange(today.getFullYear(), today.getMonth(), startDay)
+      setMonthsSelected(newRange)
+    }
+  }, [settings])
 
   const [budget, setBudget] = useState<number>(0)
   const [present, setPresent] = useState<boolean>(true)
@@ -119,44 +130,12 @@ export default function Home() {
     }
   }, [transactions])
 
-  // STYLES
-  const headerStyle: CSSProperties = {
-    display: 'flex',
-    justifyContent: isMobile ? 'unset' : 'space-between',
-    flexDirection: isMobile ? 'column-reverse' : 'row',
-    alignItems: 'center',
-    width: '100%'
-  }
-
-  const titleStyle: CSSProperties = {
-    margin: '10px 0',
-    color: 'black'
-  }
-
-  const budgetStyle: CSSProperties = {
-    margin: '10px 0',
-    color: theme.palette.primary.main,
-    textAlign: 'right',
-    display: 'flex',
-    alignItems: isMobile ? 'center' : 'flex-start',
-    gap: '5px'
-  }
-
-  const containerStyle: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    flexDirection: 'column',
-    gap: '10px'
-  }
-
-  const rowStyle: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: isMobile ? 'column' : 'row',
-    gap: '10px',
-    width: '100%'
+  if (loadingSettings) {
+    return (
+      <main className="main">
+        <CircularProgress />
+      </main>
+    )
   }
 
   return (
@@ -176,46 +155,55 @@ export default function Home() {
         }}
       >
         <Suspense fallback={<CircularProgress />}>
-          <div style={headerStyle}>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: isMobile ? 'column' : 'row',
-                alignItems: isMobile ? 'unset' : 'center',
-                gap: isMobile ? 0 : '10px'
-              }}
+          <Stack
+            direction={isMobile ? 'column-reverse' : 'row'}
+            justifyContent={isMobile ? 'unset' : 'space-between'}
+            alignItems="center"
+            width="100%"
+            mb={2}
+          >
+            <Stack
+              direction={isMobile ? 'column' : 'row'}
+              alignItems={isMobile ? 'unset' : 'center'}
+              spacing={isMobile ? 0 : 1}
             >
-              {!sideBarCollapsed && <h2 style={titleStyle}>Dashboard</h2>}
+              {!sideBarCollapsed && <Typography variant="h5" color="black" my={1}>Dashboard</Typography>}
               <MonthRangePicker
                 monthsSelected={monthsSelected}
                 setMonthsSelected={setMonthsSelected}
+                startDayOfMonth={settings?.startDayOfMonth ?? 1}
               />
-            </div>
-            {isMobile ? (
-              <h4 style={budgetStyle}>
-                Presupuesto restante: {budget} €
-                <Tooltip title="Presupuesto restante: Calculado a partir de los presupuestos asignados a las categorías y los gastos registrados. Incluye los gastos fijos del mes presente.">
-                  <Info />
-                </Tooltip>
-              </h4>
-            ) : (
-              <h3 style={budgetStyle}>
-                Presupuesto restante: {budget} €
-                <Tooltip title="Presupuesto restante: Calculado a partir de los presupuestos asignados a las categorías y los gastos registrados. Incluye los gastos fijos del mes presente.">
-                  <Info />
-                </Tooltip>
-              </h3>
-            )}
-          </div>
-          <div style={containerStyle}>
+            </Stack>
+            <Typography
+              variant={isMobile ? 'h6' : 'h5'}
+              color="primary"
+              textAlign="right"
+              display="flex"
+              alignItems={isMobile ? 'center' : 'flex-start'}
+              gap={0.5}
+              my={1}
+            >
+              Presupuesto restante: {budget} €
+              <Tooltip title="Presupuesto restante: Calculado a partir de los presupuestos asignados a las categorías y los gastos registrados. Incluye los gastos fijos del mes presente.">
+                <Info />
+              </Tooltip>
+            </Typography>
+          </Stack>
+          <Stack direction="column" spacing={2} alignItems="center">
             <BudgetCard />
-            <div style={rowStyle}>
-              <TransactionsCard />
-              <MonthDashboardCard />
-              <StatisticsCard />
-            </div>
+            <Grid container spacing={2} justifyContent="center" alignItems="flex-start">
+              <Grid item xs={12} md={4}>
+                <TransactionsCard />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <MonthDashboardCard />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <StatisticsCard />
+              </Grid>
+            </Grid>
             <HistoricDashboardCard />
-          </div>
+          </Stack>
           <DownloadReportButton />
         </Suspense>
       </HomeContext.Provider>
