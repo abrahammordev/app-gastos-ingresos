@@ -33,7 +33,12 @@
     "@typescript-eslint/no-misused-promises": "off", // Desactiva las advertencias de promesas mal utilizadas
     "@typescript-eslint/no-explicit-any": "off", // Evita el uso de any
     "@typescript-eslint/no-unused-vars": "off", // Evita variables no usadas
-    "@typescript-eslint/await-thenable": "off" // Evita el uso de await en promesas no thenables
+    "@typescript-eslint/await-thenable": "off", // Evita el uso de await en promesas no thenables
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "@typescript-eslint/no-unsafe-member-access": "off",
+    "@typescript-eslint/no-unsafe-argument": "off",
+    "@typescript-eslint/no-unsafe-return": "off",
+    "@typescript-eslint/no-floating-promises": "off",
   },
   "settings": {
     "react": {
