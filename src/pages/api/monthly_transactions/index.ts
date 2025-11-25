@@ -29,8 +29,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           where: {
             amount: type === 'expense' ? { lt: 0 } : type === 'income' ? { gt: 0 } : undefined,
             ...(filtersJson && {
-              title: filtersJson.title ? { contains: filtersJson.title, mode: 'insensitive' } : undefined,
-              category: filtersJson.category ? { contains: filtersJson.category, mode: 'insensitive' } : undefined
+              title: filtersJson.title ? { contains: filtersJson.title, mode: 'insensitive' as const} : undefined,
+              category: filtersJson.category ? { contains: filtersJson.category, mode: 'insensitive' as const} : undefined
             })
           }
         }

@@ -29,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               }
             }),
             ...(filtersJson && {
-              category: filtersJson.category ? { contains: filtersJson.category, mode: 'insensitive' } : undefined
+              category: filtersJson.category ? { contains: filtersJson.category, mode: 'insensitive' as const} : undefined
             })
           }
         }

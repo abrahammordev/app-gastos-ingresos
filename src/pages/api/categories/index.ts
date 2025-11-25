@@ -29,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }
               }),
               ...(filtersJson && {
-                id: filtersJson.id ? { contains: filtersJson.id, mode: 'insensitive' } : undefined,
+                id: filtersJson.id ? { contains: filtersJson.id, mode: 'insensitive' as const } : undefined,
               })
             }
           }
