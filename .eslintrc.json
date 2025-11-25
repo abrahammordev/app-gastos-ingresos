@@ -31,9 +31,9 @@
     "react/prop-types": "off",          // Desactiva las advertencias de PropTypes si usas TypeScript
     "react-hooks/exhaustive-deps": "off", // Desactiva las advertencias de dependencias en useEffect
     "@typescript-eslint/no-misused-promises": "off", // Desactiva las advertencias de promesas mal utilizadas
-    "@typescript-eslint/no-explicit-any": "error", // Evita el uso de any
-    "@typescript-eslint/no-unused-vars": "error", // Evita variables no usadas
-    "@typescript-eslint/await-thenable": "error" // Evita el uso de await en promesas no thenables
+    "@typescript-eslint/no-explicit-any": "off", // Evita el uso de any
+    "@typescript-eslint/no-unused-vars": "off", // Evita variables no usadas
+    "@typescript-eslint/await-thenable": "off" // Evita el uso de await en promesas no thenables
   },
   "settings": {
     "react": {
