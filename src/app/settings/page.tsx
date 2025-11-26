@@ -437,21 +437,14 @@ export default function Settings() {
                 }}
               >
                 {!sideBarCollapsed && <h2 style={titleStyle}>Configuración</h2>}
-                {present && isMobile ? (
-                  <h4 style={budgetStyle}>
+                {present && (
+                  <h3 style={{ ...budgetStyle, fontSize: isMobile ? '16px' : '1.17em', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                     Presupuesto sin asignar: {restingBudget} €
                     <Tooltip title="Cantidad del presupuesto no asignada a categorías específicas, después de considerar los ingresos fijos y los presupuestos ya asignados a otras categorías.">
-                      <Info />
-                    </Tooltip>
-                  </h4>
-                ) : present && !isMobile ? (
-                  <h3 style={budgetStyle}>
-                    Presupuesto sin asignar: {restingBudget} €
-                    <Tooltip title="Cantidad del presupuesto no asignada a categorías específicas, después de considerar los ingresos fijos y los presupuestos ya asignados a otras categorías.">
-                      <Info />
+                      <Info fontSize="small" />
                     </Tooltip>
                   </h3>
-                ) : null}
+                )}
               </div>
               <div style={tabsStyle}>
                 <Tabs

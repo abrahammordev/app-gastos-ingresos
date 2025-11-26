@@ -57,33 +57,33 @@ export default function BudgetCard() {
   useEffect(() => {
     const budgetData = new Map<string, IBudgetChart>()
 
-    // Merge budget data
-    ;[...(budgets ?? []), ...(budgetHistorics ?? [])].forEach(item => {
-      if (item.amount > 0) {
-        const existingEntry = budgetData.get(item.category)
-        if (existingEntry) {
-          existingEntry.Presupuestado += item.amount
-        } else {
-          budgetData.set(item.category, { name: item.category, Gastado: 0, Presupuestado: item.amount })
-        }
-      }
-    })
-
-    // Add transaction data
-    ;(transactions ?? [])
-      .filter(transaction => transaction.category !== 'Ingresos fijos')
-      .forEach(transaction => {
-        const category = budgetData.get(transaction.category)
-        if (category) {
-          category.Gastado -= transaction.amount
-        } else {
-          budgetData.set(transaction.category, {
-            name: transaction.category,
-            Gastado: -transaction.amount,
-            Presupuestado: 0
-          })
+      // Merge budget data
+      ;[...(budgets ?? []), ...(budgetHistorics ?? [])].forEach(item => {
+        if (item.amount > 0) {
+          const existingEntry = budgetData.get(item.category)
+          if (existingEntry) {
+            existingEntry.Presupuestado += item.amount
+          } else {
+            budgetData.set(item.category, { name: item.category, Gastado: 0, Presupuestado: item.amount })
+          }
         }
       })
+
+      // Add transaction data
+      ; (transactions ?? [])
+        .filter(transaction => transaction.category !== 'Ingresos fijos')
+        .forEach(transaction => {
+          const category = budgetData.get(transaction.category)
+          if (category) {
+            category.Gastado -= transaction.amount
+          } else {
+            budgetData.set(transaction.category, {
+              name: transaction.category,
+              Gastado: -transaction.amount,
+              Presupuestado: 0
+            })
+          }
+        })
 
     const sortedData = Array.from(budgetData.values())
       .sort((a, b) => a.name.localeCompare(b.name))
@@ -179,8 +179,7 @@ export default function BudgetCard() {
             }}
             padding={{ top: 30, bottom: 50, left: 70, right: 30 }}
             // Ajustar dinámicamente el tamaño al ancho del contenedor
-            width={window.innerWidth * 0.8} // Ancho dinámico basado en el viewport
-            height={400}
+            width={chartWidth} // Ancho dinámico basado en el contenedor
           >
             <VictoryAxis
               dependentAxis

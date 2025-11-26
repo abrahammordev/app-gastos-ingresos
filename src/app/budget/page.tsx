@@ -160,9 +160,9 @@ export default function Budget() {
         {!sideBarCollapsed && <h2 style={titleStyle}>Presupuesto</h2>}
         <div>
           {isMobile && value === 1 && (
-            <div style={buttonsStyle}>
+            <div style={{ ...buttonsStyle, justifyContent: 'flex-start', marginBottom: '10px' }}>
               <Autocomplete
-                sx={{ m: 1, width: 150 }}
+                sx={{ width: '100%' }}
                 size="small"
                 options={filterOptions}
                 value={filterOptions.find(option => option.value === filter)}

@@ -16,7 +16,6 @@ interface CategoriesBudgetCardProps {
 
 export default function CategoriesBudgetCard({ setMonthSelected }: CategoriesBudgetCardProps) {
   const isTablet = useMediaQuery('(max-width: 1024px)')
-  const isMobile = useMediaQuery('(max-width: 500px)')
   const [addCategoryBudget, setAddCategoryBudget] = useState(false)
   const [editCategoryBudget, setEditCategoryBudget] = useState(false)
   const [deleteCategoryBudget, setDeleteCategoryBudget] = useState(false)
@@ -39,8 +38,10 @@ export default function CategoriesBudgetCard({ setMonthSelected }: CategoriesBud
   // STYLES
   const titleStyle = {
     margin: '10px 0',
-    width: isMobile ? '60%' : 'unset',
-    height: !isMobile ? 28.08 : 'unset'
+    display: 'flex',
+    alignItems: 'center',
+    flexWrap: 'wrap' as const,
+    gap: '5px'
   }
 
   const cardStyle = {

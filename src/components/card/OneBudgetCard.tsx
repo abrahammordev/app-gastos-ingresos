@@ -12,48 +12,41 @@ export interface OneBudgetCardProps {
 
 export default function OneBudgetCard({ data }: OneBudgetCardProps) {
   // STYLES
-  const titleStyle = {
-    fontSize: '14px',
+  const labelStyle = {
+    fontSize: '12px',
+    color: '#666',
+    marginBottom: '4px'
   }
 
-  const dataStyle = {
-    fontSize: '14px',
-    padding: '0 10px'
+  const valueStyle = {
+    fontSize: '16px',
+    fontWeight: 'bold',
+    margin: 0
   }
 
   return (
     <BasicCard>
-      <b>{data.category}</b>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          width: '100%'
-        }}
-      >
-        <b style={titleStyle}>Gastado</b>
-        <b style={titleStyle}>Restante</b>
-        <b style={titleStyle}>Total</b>
+      <div style={{ marginBottom: '12px', borderBottom: '1px solid #eee', paddingBottom: '8px' }}>
+        <b style={{ fontSize: '16px' }}>{data.category}</b>
       </div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          width: '100%'
-        }}
-      >
-        <p style={dataStyle}>{data.spent} €</p>
-        <p style={dataStyle}>{data.remaining} €</p>
-        <p
-          style={{
-            ...dataStyle,
-            color: data.total > 0 ? 'green' : 'red'
-          }}
-        >
-          {data.total} €
-        </p>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', textAlign: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <span style={labelStyle}>Gastado</span>
+          <p style={{ ...valueStyle, color: '#d32f2f' }}>{data.spent} €</p>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <span style={labelStyle}>Restante</span>
+          <p style={{ ...valueStyle, color: '#1976d2' }}>{data.remaining} €</p>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <span style={labelStyle}>Total</span>
+          <p style={{ ...valueStyle, color: data.total > 0 ? 'green' : 'red' }}>
+            {data.total} €
+          </p>
+        </div>
       </div>
     </BasicCard>
   )

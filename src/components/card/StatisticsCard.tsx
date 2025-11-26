@@ -12,7 +12,7 @@ interface IStatisticsChart {
 }
 
 export default function StatisticsCard() {
-  const isMobile = useMediaQuery('(max-width: 600px)')
+
   const isTablet = useMediaQuery('(max-width: 1024px)')
   const [data, setData] = useState<IStatisticsChart[]>([])
 
@@ -63,7 +63,7 @@ export default function StatisticsCard() {
   // STYLES
   const titleStyle = { margin: '10px 0' }
 
-  const cardStyle = { width: isMobile ? '100%' : '40%', height: isTablet ? '520px' : '450px' }
+  const cardStyle = { width: '100%', height: isTablet ? '520px' : '450px' }
 
   const containerStyle: CSSProperties = {
     display: 'flex',

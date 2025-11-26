@@ -4,7 +4,7 @@ import { CSSProperties, useContext } from 'react'
 import BasicCard from './BasicCard'
 
 export default function TransactionsCard() {
-  const isMobile = useMediaQuery('(max-width: 600px)')
+
   const isTablet = useMediaQuery('(max-width: 1024px)')
 
   const { loadingTransactions, transactions } = useContext(HomeContext)
@@ -15,7 +15,7 @@ export default function TransactionsCard() {
   }
 
   const cardStyle = {
-    width: isMobile ? '100%' : '30%',
+    width: '100%',
     height: isTablet ? '520px' : '450px'
   }
 

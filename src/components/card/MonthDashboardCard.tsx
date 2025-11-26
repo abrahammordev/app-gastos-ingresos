@@ -20,6 +20,7 @@ export interface ISummaryChart {
 }
 
 export default function MonthDashboardCard() {
+
   const isMobile = useMediaQuery('(max-width: 600px)')
   const isTablet = useMediaQuery('(max-width: 1024px)')
 
@@ -281,7 +282,7 @@ export default function MonthDashboardCard() {
   }
 
   const cardStyle = {
-    width: isMobile ? '100%' : '40%',
+    width: '100%',
     height: isTablet ? '520px' : '450px'
   }
 

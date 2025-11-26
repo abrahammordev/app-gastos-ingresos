@@ -11,33 +11,19 @@ export interface OneCategoryBudgetCardProps {
 }
 
 export default function OneCategoryBudgetCard({ data }: OneCategoryBudgetCardProps) {
-  // STYLES
-  const titleStyle = {
-    fontSize: '14px'
-  }
-
-  const dataStyle = {
-    fontSize: '14px',
-    padding: '0 10px'
-  }
-
-  const contentStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  }
-
   return (
     <BasicCard>
-      <p>
-        <b>{data.category}</b>
-      </p>
-      <div style={contentStyle}>
-        <div>
-          <b style={titleStyle}>Presupuesto</b>
-          <p style={dataStyle}>{data.budget} €</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <b style={{ fontSize: '16px' }}>{data.category}</b>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '12px', color: '#666' }}>Presupuesto:</span>
+            <span style={{ fontSize: '14px', fontWeight: 'bold' }}>{data.budget} €</span>
+          </div>
         </div>
-        {data.actions}
+        <div>
+          {data.actions}
+        </div>
       </div>
     </BasicCard>
   )
