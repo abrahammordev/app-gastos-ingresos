@@ -10,6 +10,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ success: false })
   }
 
+  // Check if today is the start day of the fiscal month
+  const settings = await prisma.appSettings.findFirst()
+  const startDayOfMonth = settings?.startDayOfMonth ?? 1
+  const today = new Date()
+
+  // We only want to run this if today is the start day of the fiscal month
+  // This means the previous fiscal month ended yesterday
+  if (today.getDate() !== startDayOfMonth) {
+    return res.status(200).json({ success: true, message: 'Skipped: Not the start day of the fiscal month' })
+  }
+
   try {
     const budgets = await prisma.budget.findMany()
     var d = new Date()

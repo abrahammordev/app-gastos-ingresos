@@ -94,8 +94,20 @@ export default function Home() {
         )
       }
 
-      const totalHistorics = budgetHistoricsData.budgetHistorics
-        .filter(budgetHistoric => budgetHistoric.category !== 'Ingresos fijos') // We don't want to take into account the fixed incomes
+      const startDay = settings?.startDayOfMonth ?? 1
+      const currentFiscalRange = getCurrentFiscalMonthRange(startDay)
+      const currentFiscalStart = new Date(currentFiscalRange[0])
+
+      const filteredHistorics = budgetHistoricsData.budgetHistorics
+        .filter(historic => {
+          if (new Date(monthsSelected[1]) >= new Date(currentDate)) {
+            return new Date(historic.date) < currentFiscalStart
+          }
+          return true
+        })
+
+      const totalHistorics = filteredHistorics
+        .filter(budgetHistoric => budgetHistoric.category !== 'Ingresos fijos')
         .reduce((acc, historic) => acc + historic.amount, 0)
 
       const totalSpent = transactions
@@ -104,7 +116,7 @@ export default function Home() {
 
       setBudget(getTwoFirstDecimals(totalBudget + totalHistorics + totalSpent + totalFixedExpenses))
     }
-  }, [budgetsData, transactions, budgetHistoricsData])
+  }, [budgetsData, transactions, budgetHistoricsData, settings])
 
   useEffect(() => {
     const currentDate = formatDate(
@@ -137,6 +149,24 @@ export default function Home() {
     )
   }
 
+  const startDay = settings?.startDayOfMonth ?? 1
+  const currentFiscalRange = getCurrentFiscalMonthRange(startDay)
+  const currentFiscalStart = new Date(currentFiscalRange[0])
+  const currentDate = formatDate(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+    today.getHours(),
+    today.getMinutes()
+  )
+
+  const contextBudgetHistorics = budgetHistoricsData ? budgetHistoricsData.budgetHistorics.filter(historic => {
+    if (new Date(monthsSelected[1]) >= new Date(currentDate)) {
+      return new Date(historic.date) < currentFiscalStart
+    }
+    return true
+  }) : []
+
   return (
     <main className="main">
       <HomeContext.Provider
@@ -147,7 +177,7 @@ export default function Home() {
           setBudget,
           transactions,
           budgets: present ? (budgetsData ? budgetsData.budgets : []) : null,
-          budgetHistorics: budgetHistoricsData ? budgetHistoricsData.budgetHistorics : [],
+          budgetHistorics: contextBudgetHistorics,
           loadingTransactions,
           loadingBudgets,
           loadingBudgetHistorics,
