@@ -1,7 +1,6 @@
 import { HomeContext } from '@/contexts/HomeContext'
-import theme from '@/theme'
 import { getTwoFirstDecimals } from '@/utils/utils'
-import { CircularProgress, useMediaQuery } from '@mui/material'
+import { CircularProgress, useMediaQuery, useTheme as useMuiTheme } from '@mui/material'
 import { CSSProperties, useContext, useEffect, useState } from 'react'
 import {
   Bar,
@@ -25,6 +24,7 @@ interface IBudgetChart {
 }
 
 export default function BudgetCard() {
+  const theme = useMuiTheme()
   const isMobile = useMediaQuery('(max-width: 600px)')
   const isTablet = useMediaQuery('(max-width: 1024px)')
 

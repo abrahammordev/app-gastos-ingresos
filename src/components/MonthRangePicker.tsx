@@ -23,6 +23,7 @@ export default function MonthRangePicker({ monthsSelected, setMonthsSelected, st
   const searchParams = useSearchParams()
 
   const isMobile = useMediaQuery('(max-width: 600px)')
+  const isVerySmallScreen = useMediaQuery('(max-width: 380px)')
   const [disabledNext, setDisabledNext] = useState(false)
   dayjs.extend(utc)
 
@@ -105,7 +106,7 @@ export default function MonthRangePicker({ monthsSelected, setMonthsSelected, st
         inputReadOnly
         onChange={dates => handleOnChangeDates(dates as [Dayjs, Dayjs])}
         style={{
-          width: isMobile ? '190px' : '220px',
+          width: isVerySmallScreen ? '110px' : isMobile ? '140px' : '220px',
           marginBottom: '5px',
           paddingBottom: 0,
           paddingLeft: 0,

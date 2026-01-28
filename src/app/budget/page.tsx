@@ -2,24 +2,36 @@
 import BudgetTable from '@/components/table/BudgetTable'
 import { BudgetsContext } from '@/contexts/BudgetsContext'
 import { RefreshContext } from '@/contexts/RefreshContext'
+import useAppSettings from '@/hooks/useAppSettings'
 import { IBudget, IBudgetHistoric, ITransaction } from '@/types/index'
 import customFetch from '@/utils/fetchWrapper'
-import { formatDate, handleDateFilterChange } from '@/utils/utils'
-import { Autocomplete, Tab, Tabs, TextField, useMediaQuery } from '@mui/material'
+import { formatDate, getCurrentFiscalMonthRange, handleDateFilterChange } from '@/utils/utils'
+import { Autocomplete, CircularProgress, Tab, Tabs, TextField, useMediaQuery } from '@mui/material'
 import { SyntheticEvent, useCallback, useContext, useEffect, useState } from 'react'
 import '../../styles.css'
 
 export default function Budget() {
+  const today = new Date()
+  const { settings, loading: loadingSettings } = useAppSettings()
+
   const [value, setValue] = useState(0)
   const [filter, setFilter] = useState('')
   const [monthsSelected, setMonthsSelected] = useState<[string, string]>(
-    handleDateFilterChange('this_month') as [string, string]
+    [formatDate(today.getFullYear(), today.getMonth(), 1, 0, 0), formatDate(today.getFullYear(), today.getMonth() + 1, 0, 23, 59)]
   )
   const [present, setPresent] = useState(true)
   const isMobile = useMediaQuery('(max-width: 600px)')
   const sideBarCollapsed = useMediaQuery('(max-width: 899px)')
   const [transactions, setTransactions] = useState<ITransaction[]>([])
   const { refreshKeyTransactions } = useContext(RefreshContext)
+
+  // Initialize monthsSelected with fiscal month range after settings load
+  useEffect(() => {
+    if (settings) {
+      const newRange = getCurrentFiscalMonthRange(settings.startDayOfMonth)
+      setMonthsSelected(newRange)
+    }
+  }, [settings])
 
   const [page, setPage] = useState(0)
   const [limit, setLimit] = useState(25)
@@ -78,13 +90,18 @@ export default function Budget() {
       setFilter('all')
       setMonthsSelected(['', ''])
     } else {
-      setMonthsSelected(handleDateFilterChange('this_month') as [string, string])
+      const startDay = settings?.startDayOfMonth ?? 1
+      setMonthsSelected(getCurrentFiscalMonthRange(startDay))
     }
   }
 
   const handleChangeFilter = (newValue: { label: string; value: string }) => {
     setFilter(newValue.value)
-    setMonthsSelected(handleDateFilterChange(newValue.value) as [string, string])
+    if (newValue.value === 'all') {
+      setMonthsSelected(['', ''])
+    } else {
+      setMonthsSelected(handleDateFilterChange(newValue.value) as [string, string])
+    }
   }
 
   useEffect(() => {
@@ -138,7 +155,10 @@ export default function Budget() {
 
   return (
     <main className="main">
-      <BudgetsContext.Provider
+      {loadingSettings ? (
+        <CircularProgress />
+      ) : (
+        <BudgetsContext.Provider
         value={{
           transactions,
           budgets: budgets,
@@ -211,6 +231,7 @@ export default function Budget() {
           </div>
         </div>
       </BudgetsContext.Provider>
+      )}
     </main>
   )
 }

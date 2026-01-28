@@ -22,13 +22,17 @@
     "project": "./tsconfig.json",
     "tsconfigRootDir": "."
   },
-  "ignorePatterns": ["src/pages/", "src/lib/", "node_modules/"],
+  "ignorePatterns": [
+    "src/pages/",
+    "src/lib/",
+    "node_modules/"
+  ],
   "plugins": [
     "react"
   ],
   "rules": {
-    "react/react-in-jsx-scope": "off",  // Necesario para Next.js desde React 17
-    "react/prop-types": "off",          // Desactiva las advertencias de PropTypes si usas TypeScript
+    "react/react-in-jsx-scope": "off", // Necesario para Next.js desde React 17
+    "react/prop-types": "off", // Desactiva las advertencias de PropTypes si usas TypeScript
     "react-hooks/exhaustive-deps": "off", // Desactiva las advertencias de dependencias en useEffect
     "@typescript-eslint/no-misused-promises": "off", // Desactiva las advertencias de promesas mal utilizadas
     "@typescript-eslint/no-explicit-any": "off", // Evita el uso de any
@@ -38,11 +42,11 @@
     "@typescript-eslint/no-unsafe-member-access": "off",
     "@typescript-eslint/no-unsafe-argument": "off",
     "@typescript-eslint/no-unsafe-return": "off",
-    "@typescript-eslint/no-floating-promises": "off",
+    "@typescript-eslint/no-floating-promises": "off"
   },
   "settings": {
     "react": {
-      "version": "detect"  // Detecta automáticamente la versión de React
+      "version": "detect" // Detecta automáticamente la versión de React
     }
   }
 }

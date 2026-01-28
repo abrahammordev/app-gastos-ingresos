@@ -1,9 +1,10 @@
 'use client'
 
 import ResponsiveDrawer from '@/components/ResponsiveDrawer'
+import { ThemeProvider } from '@/contexts/ThemeContext'
 import { ReactNode, useEffect } from 'react'
 
-export default function ClientLayout({ children }: { children: ReactNode }) {
+function ClientLayoutInner({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (process.env.NODE_ENV !== 'production') {
       // eslint-disable-next-line no-console
@@ -27,4 +28,12 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
   }, [])
 
   return <ResponsiveDrawer>{children}</ResponsiveDrawer>
+}
+
+export default function ClientLayout({ children }: { children: ReactNode }) {
+  return (
+    <ThemeProvider>
+      <ClientLayoutInner>{children}</ClientLayoutInner>
+    </ThemeProvider>
+  )
 }

@@ -2,7 +2,7 @@ import { HomeContext } from '@/contexts/HomeContext'
 import useFetch from '@/hooks/useFetch'
 import { IBudgetHistorics, ITransactions } from '@/types/index'
 import { convertDate, formatDate, formatMonthYear, getTwoFirstDecimals } from '@/utils/utils'
-import { CircularProgress, useMediaQuery } from '@mui/material'
+import { CircularProgress, useMediaQuery, useTheme as useMuiTheme } from '@mui/material'
 import { CSSProperties, useContext, useEffect, useState } from 'react'
 import {
   Bar,
@@ -18,7 +18,6 @@ import {
 } from 'recharts'
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
 import BasicCard from './BasicCard'
-import theme from '@/theme'
 
 interface IHistoricChart {
   name: string
@@ -27,6 +26,7 @@ interface IHistoricChart {
 }
 
 export default function HistoricDashboardCard() {
+  const theme = useMuiTheme()
   const isMobile = useMediaQuery('(max-width: 600px)')
   const isTablet = useMediaQuery('(max-width: 1024px)')
   const [monthsHistoric, setMonthsHistoric] = useState<[string, string]>(['', ''])

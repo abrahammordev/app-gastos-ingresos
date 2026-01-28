@@ -1,11 +1,10 @@
 'use client'
 import { RefreshContext } from '@/contexts/RefreshContext'
-import theme from '@/theme'
-import { Add, Calculate, CurrencyExchange, Home, Logout, Settings } from '@mui/icons-material'
+import { getTheme } from '@/theme'
+import { Add, Calculate, CurrencyExchange, Home, Logout, Settings, DarkMode, LightMode } from '@mui/icons-material'
 import MenuIcon from '@mui/icons-material/Menu'
-import { Fab, ThemeProvider } from '@mui/material'
+import { Fab, ThemeProvider as MuiThemeProvider, Switch, Box } from '@mui/material'
 import AppBar from '@mui/material/AppBar'
-import Box from '@mui/material/Box'
 import CssBaseline from '@mui/material/CssBaseline'
 import Divider from '@mui/material/Divider'
 import Drawer from '@mui/material/Drawer'
@@ -20,6 +19,7 @@ import Typography from '@mui/material/Typography'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { useTheme } from '@/contexts/ThemeContext'
 import TransactionModal from './modal/TransactionModal'
 
 const drawerWidth = 240
@@ -29,8 +29,10 @@ export default function ResponsiveDrawer({
 }: Readonly<{
   children: ReactNode
 }>) {
+  const { darkMode, toggleDarkMode } = useTheme()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const pathname = usePathname()
   const [addTransaction, setAddTransaction] = useState(false)
 
@@ -71,6 +73,16 @@ export default function ResponsiveDrawer({
     }
   }, [])
 
+  // Set mounted on client side to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const navActiveColor = mounted && darkMode ? '#ffffff' : '#000000'
+  const navInactiveColor = mounted && darkMode ? '#b0b0b0' : 'gray'
+  const navActiveBg = mounted && darkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)'
+  const headerColor = mounted && darkMode ? '#ffffff' : '#000000'
+
   const drawer = (
     <div>
       <Toolbar style={{ display: 'flex', justifyContent: 'space-evenly' }}>
@@ -81,13 +93,13 @@ export default function ResponsiveDrawer({
         <ListItem key="Inicio" disablePadding>
           <ListItemButton
             style={{
-              backgroundColor: pathname === '/' ? 'rgba(0, 0, 0, 0.04)' : 'inherit',
-              color: pathname === '/' ? 'black' : 'gray'
+              backgroundColor: pathname === '/' ? navActiveBg : 'inherit',
+              color: pathname === '/' ? navActiveColor : navInactiveColor
             }}
             href="/"
           >
             <ListItemIcon>
-              <Home style={{ color: pathname === '/' ? 'black' : 'gray' }} />
+              <Home style={{ color: pathname === '/' ? navActiveColor : navInactiveColor }} />
             </ListItemIcon>
             <ListItemText primary="Inicio" />
           </ListItemButton>
@@ -95,13 +107,13 @@ export default function ResponsiveDrawer({
         <ListItem key="Transacciones" disablePadding>
           <ListItemButton
             style={{
-              backgroundColor: pathname === '/transactions' ? 'rgba(0, 0, 0, 0.04)' : 'inherit',
-              color: pathname === '/transactions' ? 'black' : 'gray'
+              backgroundColor: pathname === '/transactions' ? navActiveBg : 'inherit',
+              color: pathname === '/transactions' ? navActiveColor : navInactiveColor
             }}
             href="/transactions"
           >
             <ListItemIcon>
-              <CurrencyExchange style={{ color: pathname === '/transactions' ? 'black' : 'gray' }} />
+              <CurrencyExchange style={{ color: pathname === '/transactions' ? navActiveColor : navInactiveColor }} />
             </ListItemIcon>
             <ListItemText primary="Transacciones" />
           </ListItemButton>
@@ -109,13 +121,13 @@ export default function ResponsiveDrawer({
         <ListItem key="Presupuesto" disablePadding>
           <ListItemButton
             style={{
-              backgroundColor: pathname === '/budget' ? 'rgba(0, 0, 0, 0.04)' : 'inherit',
-              color: pathname === '/budget' ? 'black' : 'gray'
+              backgroundColor: pathname === '/budget' ? navActiveBg : 'inherit',
+              color: pathname === '/budget' ? navActiveColor : navInactiveColor
             }}
             href="/budget"
           >
             <ListItemIcon>
-              <Calculate style={{ color: pathname === '/budget' ? 'black' : 'gray' }} />
+              <Calculate style={{ color: pathname === '/budget' ? navActiveColor : navInactiveColor }} />
             </ListItemIcon>
             <ListItemText primary="Presupuesto" />
           </ListItemButton>
@@ -123,23 +135,39 @@ export default function ResponsiveDrawer({
         <ListItem key="Configuración" disablePadding>
           <ListItemButton
             style={{
-              backgroundColor: pathname === '/settings' ? 'rgba(0, 0, 0, 0.04)' : 'inherit',
-              color: pathname === '/settings' ? 'black' : 'gray'
+              backgroundColor: pathname === '/settings' ? navActiveBg : 'inherit',
+              color: pathname === '/settings' ? navActiveColor : navInactiveColor
             }}
             href="/settings"
           >
             <ListItemIcon>
-              <Settings style={{ color: pathname === '/settings' ? 'black' : 'gray' }} />
+              <Settings style={{ color: pathname === '/settings' ? navActiveColor : navInactiveColor }} />
             </ListItemIcon>
             <ListItemText primary="Configuración" />
           </ListItemButton>
+        </ListItem>
+        <Divider />
+        {/* Dark mode toggle in sidebar */}
+        <ListItem key="Modo oscuro" disablePadding>
+          <Box sx={{ display: 'flex', alignItems: 'center', px: 2, py: 1, gap: 1 }}>
+            <ListItemIcon sx={{ minWidth: 'unset', pr: 2 }}>
+              {mounted && darkMode ? <DarkMode style={{ color: navInactiveColor }} /> : <LightMode style={{ color: navInactiveColor }} />}
+            </ListItemIcon>
+            <ListItemText primary="Modo oscuro" />
+            <Switch
+              checked={mounted ? darkMode : false}
+              onChange={(e) => toggleDarkMode(e.target.checked)}
+              color="primary"
+              size="small"
+            />
+          </Box>
         </ListItem>
         <Divider />
         <ListItem key="Cerrar sesión" disablePadding>
           <ListItemButton
             style={{
               backgroundColor: 'inherit',
-              color: 'gray'
+              color: navInactiveColor
             }}
             href="/login"
             onClick={() => {
@@ -147,7 +175,7 @@ export default function ResponsiveDrawer({
             }}
           >
             <ListItemIcon>
-              <Logout style={{ color: 'gray' }} />
+              <Logout style={{ color: navInactiveColor }} />
             </ListItemIcon>
             <ListItemText primary="Cerrar sesión" />
           </ListItemButton>
@@ -159,7 +187,7 @@ export default function ResponsiveDrawer({
   const isLogin = pathname === '/login'
 
   return (
-    <ThemeProvider theme={theme}>
+    <MuiThemeProvider theme={getTheme(mounted ? darkMode : false)}>
       <RefreshContext.Provider
         value={{ refreshKeyTransactions, refreshTransactions, refreshKeyCategories, refreshCategories }}
       >
@@ -185,9 +213,9 @@ export default function ResponsiveDrawer({
                   onClick={handleDrawerToggle}
                   sx={{ mr: 2, display: { md: 'none' } }}
                 >
-                  <MenuIcon style={{ color: 'black' }} />
+                  <MenuIcon style={{ color: headerColor }} />
                 </IconButton>
-                <Typography variant="h6" noWrap component="div" color="black">
+                <Typography variant="h6" noWrap component="div" color={headerColor}>
                   {pathname === '/'
                     ? 'Inicio'
                     : pathname === '/transactions'
@@ -233,7 +261,7 @@ export default function ResponsiveDrawer({
             </Box>
             <Box
               component="main"
-              sx={{ flexGrow: 1, p: 3, width: { md: `calc(100% - ${drawerWidth}px)`, backgroundColor: '#F7F9FB' } }}
+              sx={{ flexGrow: 1, p: 3, width: { md: `calc(100% - ${drawerWidth}px)`, backgroundColor: mounted && darkMode ? '#121212' : '#F7F9FB' } }}
             >
               <Toolbar
                 sx={{
@@ -259,6 +287,6 @@ export default function ResponsiveDrawer({
           </Box>
         )}
       </RefreshContext.Provider>
-    </ThemeProvider>
+    </MuiThemeProvider>
   )
 }

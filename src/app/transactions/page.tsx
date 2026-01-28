@@ -2,25 +2,37 @@
 import TransactionModal from '@/components/modal/TransactionModal'
 import TransactionsTable from '@/components/table/TransactionsTable'
 import { TransactionsContext } from '@/contexts/TransactionsContext'
+import useAppSettings from '@/hooks/useAppSettings'
 import { ITransaction } from '@/types/index'
 import customFetch from '@/utils/fetchWrapper'
-import { handleDateFilterChange } from '@/utils/utils'
+import { formatDate, getCurrentFiscalMonthRange } from '@/utils/utils'
 import { Add } from '@mui/icons-material'
 import { Button, CircularProgress, Tab, Tabs, useMediaQuery } from '@mui/material'
-import { Suspense, SyntheticEvent, useCallback, useEffect, useState } from 'react'
+import { Suspense, SyntheticEvent, useCallback, CSSProperties, useEffect, useState } from 'react'
 import '../../styles.css'
 import MonthRangePicker from '@/components/MonthRangePicker'
 
 export default function Transactions() {
+  const today = new Date()
+  const { settings, loading: loadingSettings } = useAppSettings()
+
   const [value, setValue] = useState(0)
   const [monthsSelected, setMonthsSelected] = useState<[string, string]>(
-    handleDateFilterChange('this_month') as [string, string]
+    [formatDate(today.getFullYear(), today.getMonth(), 1, 0, 0), formatDate(today.getFullYear(), today.getMonth() + 1, 0, 23, 59)]
   )
-  const isMobile = useMediaQuery('(max-width: 1010px)')
+  const isMobile = useMediaQuery('(max-width: 900px)')
   const sideBarCollapsed = useMediaQuery('(max-width: 899px)')
   const [addTransactionTable, setAddTransactionTable] = useState(false)
   const [openEditTransaction, setOpenEditTransaction] = useState(false)
   const [transaction, setTransaction] = useState<ITransaction | null>(null)
+
+  // Initialize monthsSelected with fiscal month range after settings load
+  useEffect(() => {
+    if (settings) {
+      const newRange = getCurrentFiscalMonthRange(settings.startDayOfMonth)
+      setMonthsSelected(newRange)
+    }
+  }, [settings])
 
   const [page, setPage] = useState(0)
   const [limit, setLimit] = useState(25)
@@ -101,6 +113,14 @@ export default function Transactions() {
     document.title = `Transacciones`
   }, [])
 
+  if (loadingSettings) {
+    return (
+      <main className="main">
+        <CircularProgress />
+      </main>
+    )
+  }
+
   // STYLES
   const titleStyle = { margin: '10px 0', color: 'black' }
 
@@ -112,7 +132,13 @@ export default function Transactions() {
     marginBottom: '10px'
   }
 
-  const buttonsStyle = { display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '10px' }
+  const buttonsStyle: CSSProperties = {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: '10px',
+    flexWrap: isMobile ? 'wrap' : 'nowrap'
+  }
 
   return (
     <main className="main">
@@ -140,7 +166,11 @@ export default function Transactions() {
           <div>
             {isMobile && (
               <div style={buttonsStyle}>
-                <MonthRangePicker monthsSelected={monthsSelected} setMonthsSelected={setMonthsSelected} />
+                <MonthRangePicker
+                  monthsSelected={monthsSelected}
+                  setMonthsSelected={setMonthsSelected}
+                  startDayOfMonth={settings?.startDayOfMonth ?? 1}
+                />
                 <Button
                   variant="contained"
                   color="primary"
@@ -165,7 +195,11 @@ export default function Transactions() {
               </Tabs>
               {!isMobile && (
                 <div style={buttonsStyle}>
-                  <MonthRangePicker monthsSelected={monthsSelected} setMonthsSelected={setMonthsSelected} />
+                  <MonthRangePicker
+                    monthsSelected={monthsSelected}
+                    setMonthsSelected={setMonthsSelected}
+                    startDayOfMonth={settings?.startDayOfMonth ?? 1}
+                  />
                   <Button
                     variant="contained"
                     color="primary"

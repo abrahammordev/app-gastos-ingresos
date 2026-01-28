@@ -1,9 +1,8 @@
 import { RefreshContext } from '@/contexts/RefreshContext'
 import { SettingsBudgetsContext } from '@/contexts/SettingsBudgetsContext'
-import theme from '@/theme'
 import { ICategories, ICategory } from '@/types/index'
 import customFetch from '@/utils/fetchWrapper'
-import { Autocomplete, Button, TextField, createFilterOptions, useMediaQuery } from '@mui/material'
+import { Autocomplete, Button, TextField, createFilterOptions, useMediaQuery, useTheme as useMuiTheme } from '@mui/material'
 import { CSSProperties, ChangeEvent, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import BasicModal from './BasicModal'
 
@@ -21,6 +20,7 @@ const filter = createFilterOptions<CategoryType>()
 
 export default function AddCategoryBudgetModal({ open, handleClose }: AddCategoryBudgetModalProps) {
   const inputRef = useRef<HTMLInputElement>()
+  const theme = useMuiTheme()
 
   const isMobile = useMediaQuery('(max-width: 600px)')
   const [category, setCategory] = useState<CategoryType>({ title: '' })

@@ -1,10 +1,9 @@
 import { RefreshContext } from '@/contexts/RefreshContext'
 import { SettingsCategoriesContext } from '@/contexts/SettingsCategoriesContext'
 import useFetch from '@/hooks/useFetch'
-import theme from '@/theme'
 import { ICategories } from '@/types/index'
 import customFetch from '@/utils/fetchWrapper'
-import { Button, TextField, useMediaQuery } from '@mui/material'
+import { Button, TextField, useMediaQuery, useTheme as useMuiTheme } from '@mui/material'
 import { CSSProperties, useContext, useEffect, useRef, useState } from 'react'
 import BasicModal from './BasicModal'
 
@@ -15,6 +14,7 @@ export interface AddCategoryModalProps {
 
 export default function AddCategoryModal({ open, handleClose }: AddCategoryModalProps) {
   const inputRef = useRef<HTMLInputElement>()
+  const theme = useMuiTheme()
 
   const isMobile = useMediaQuery('(max-width: 600px)')
   const [category, setCategory] = useState<string>('')

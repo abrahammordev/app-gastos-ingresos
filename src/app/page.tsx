@@ -197,7 +197,7 @@ export default function Home() {
               alignItems={isMobile ? 'unset' : 'center'}
               spacing={isMobile ? 0 : 1}
             >
-              {!sideBarCollapsed && <Typography variant="h5" color="black" my={1}>Dashboard</Typography>}
+              {!sideBarCollapsed && <Typography variant="h5" color="Grey" my={1}>Dashboard</Typography>}
               <MonthRangePicker
                 monthsSelected={monthsSelected}
                 setMonthsSelected={setMonthsSelected}

@@ -10,7 +10,8 @@ export async function GET() {
     if (!settings) {
       settings = await prisma.appSettings.create({
         data: {
-          startDayOfMonth: 1
+          startDayOfMonth: 1,
+          darkMode: false
         }
       })
     }
@@ -23,22 +24,34 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
-    const { startDayOfMonth } = await request.json()
-    
-    // Validate input
-    if (startDayOfMonth < 1 || startDayOfMonth > 28) {
+    const { startDayOfMonth, darkMode } = await request.json()
+
+    // Validate startDayOfMonth if provided
+    if (startDayOfMonth !== undefined && (startDayOfMonth < 1 || startDayOfMonth > 28)) {
        return NextResponse.json({ error: 'Invalid start day. Must be between 1 and 28.' }, { status: 400 })
     }
 
     let settings = await prisma.appSettings.findFirst()
+    const updateData: { startDayOfMonth?: number; darkMode?: boolean } = {}
+
+    if (startDayOfMonth !== undefined) {
+      updateData.startDayOfMonth = startDayOfMonth
+    }
+    if (darkMode !== undefined) {
+      updateData.darkMode = darkMode
+    }
+
     if (settings) {
       settings = await prisma.appSettings.update({
         where: { id: settings.id },
-        data: { startDayOfMonth }
+        data: updateData
       })
     } else {
       settings = await prisma.appSettings.create({
-        data: { startDayOfMonth }
+        data: {
+          startDayOfMonth: startDayOfMonth ?? 1,
+          darkMode: darkMode ?? false
+        }
       })
     }
     return NextResponse.json(settings)

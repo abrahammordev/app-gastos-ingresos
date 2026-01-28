@@ -5,6 +5,7 @@ import customFetch from '@/utils/fetchWrapper'
 export interface AppSettings {
     id: number
     startDayOfMonth: number
+    darkMode: boolean
 }
 
 export default function useAppSettings() {

@@ -53,4 +53,5 @@ model Category {
 model AppSettings {
   id             Int @id @default(autoincrement())
   startDayOfMonth Int @default(1)
+  darkMode       Boolean @default(false)
 }

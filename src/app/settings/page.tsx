@@ -7,20 +7,21 @@ import { SettingsBudgetsContext } from '@/contexts/SettingsBudgetsContext'
 import { SettingsCategoriesContext } from '@/contexts/SettingsCategoriesContext'
 import { SettingsMonthlyExpenseTransactionsContext } from '@/contexts/SettingsMonthlyExpenseTransactionsContext'
 import { SettingsMonthlyIncomeTransactionsContext } from '@/contexts/SettingsMonthlyIncomeTransactionsContext'
-import theme from '@/theme'
 import { IBudget, IBudgetHistoric, ICategory, IMonthlyTransaction } from '@/types/index'
 import customFetch from '@/utils/fetchWrapper'
 import { Info } from '@mui/icons-material'
-import { Tab, Tabs, Tooltip, useMediaQuery } from '@mui/material'
+import { Tab, Tabs, Tooltip, useMediaQuery, Switch, Box, Typography, useTheme as useMuiTheme } from '@mui/material'
 import dayjs from 'dayjs'
 import { CSSProperties, SyntheticEvent, useCallback, useContext, useEffect, useState } from 'react'
 import '../../styles.css'
 import { formatDate, getTwoFirstDecimals } from '@/utils/utils'
 import useAppSettings from '@/hooks/useAppSettings'
+import { useTheme } from '@/contexts/ThemeContext'
 import BasicCard from '@/components/card/BasicCard'
 import { TextField, Button, Snackbar, Alert } from '@mui/material'
 
 export default function Settings() {
+  const theme = useMuiTheme()
   const { refreshCategories: refreshAllCategories } = useContext(RefreshContext)
   const isMobile = useMediaQuery('(max-width: 600px)')
   const sideBarCollapsed = useMediaQuery('(max-width: 899px)')
@@ -66,6 +67,7 @@ export default function Settings() {
   const [value, setValue] = useState(0)
 
   const { settings, updateSettings } = useAppSettings()
+  const { darkMode, toggleDarkMode } = useTheme()
   const [startDay, setStartDay] = useState<number>(1)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
@@ -517,6 +519,14 @@ export default function Settings() {
                           onChange={(e) => setStartDay(parseInt(e.target.value))}
                           helperText="Selecciona el día en que se reinicia el presupuesto (1-28)"
                         />
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <Typography>Modo oscuro</Typography>
+                          <Switch
+                            checked={darkMode}
+                            onChange={(e) => toggleDarkMode(e.target.checked)}
+                            color="primary"
+                          />
+                        </Box>
                         <Button variant="contained" color="primary" onClick={handleSaveSettings}>
                           Guardar
                         </Button>
