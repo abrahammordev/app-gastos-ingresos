@@ -122,7 +122,7 @@ export default function Transactions() {
   }
 
   // STYLES
-  const titleStyle = { margin: '10px 0', color: 'black' }
+  const titleStyle = { margin: '10px 0', color: 'var(--text-primary)' }
 
   const tabsStyle = {
     display: 'flex',

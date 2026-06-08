@@ -15,10 +15,19 @@ export default function OneCategoryBudgetCard({ data }: OneCategoryBudgetCardPro
     <BasicCard>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <b style={{ fontSize: '16px' }}>{data.category}</b>
+          <b style={{ fontSize: '16px', color: 'var(--text-primary)' }}>{data.category}</b>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '12px', color: '#666' }}>Presupuesto:</span>
-            <span style={{ fontSize: '14px', fontWeight: 'bold' }}>{data.budget} €</span>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Presupuesto:</span>
+            <span
+              style={{
+                fontSize: '14px',
+                fontWeight: 600,
+                fontVariantNumeric: 'tabular-nums',
+                color: '#4A9ABE'
+              }}
+            >
+              {data.budget.toLocaleString('es-ES')} €
+            </span>
           </div>
         </div>
         <div>

@@ -2,9 +2,11 @@
 import MonthRangePicker from '@/components/MonthRangePicker'
 import BudgetCard from '@/components/card/BudgetCard'
 import HistoricDashboardCard from '@/components/card/HistoricDashboardCard'
+import KpiSummaryCard from '@/components/card/KpiSummaryCard'
 import MonthDashboardCard from '@/components/card/MonthDashboardCard'
 import StatisticsCard from '@/components/card/StatisticsCard'
 import TransactionsCard from '@/components/card/TransactionsCard'
+import ExportCsvButton from '@/components/ExportCsvButton'
 import DownloadReportButton from '@/components/reports/DownloadReportButton'
 import { HomeContext } from '@/contexts/HomeContext'
 import { RefreshContext } from '@/contexts/RefreshContext'
@@ -204,22 +206,26 @@ export default function Home() {
                 startDayOfMonth={settings?.startDayOfMonth ?? 1}
               />
             </Stack>
-            <Typography
-              variant={isMobile ? 'h6' : 'h5'}
-              color="primary"
-              textAlign="right"
-              display="flex"
-              alignItems={isMobile ? 'center' : 'flex-start'}
-              gap={0.5}
-              my={1}
-            >
-              Presupuesto restante: {budget} €
-              <Tooltip title="Presupuesto restante: Calculado a partir de los presupuestos asignados a las categorías y los gastos registrados. Incluye los gastos fijos del mes presente.">
-                <Info />
-              </Tooltip>
-            </Typography>
+            <Stack direction="row" alignItems="center" gap={1}>
+              <Typography
+                variant={isMobile ? 'h6' : 'h5'}
+                color="primary"
+                textAlign="right"
+                display="flex"
+                alignItems={isMobile ? 'center' : 'flex-start'}
+                gap={0.5}
+                my={1}
+              >
+                Presupuesto restante: {budget} €
+                <Tooltip title="Presupuesto restante: Calculado a partir de los presupuestos asignados a las categorías y los gastos registrados. Incluye los gastos fijos del mes presente.">
+                  <Info aria-label="Información sobre el presupuesto restante" />
+                </Tooltip>
+              </Typography>
+              {!isMobile && <ExportCsvButton />}
+            </Stack>
           </Stack>
           <Stack direction="column" spacing={2} alignItems="center">
+            <KpiSummaryCard />
             <BudgetCard />
             <Grid container spacing={2} justifyContent="center" alignItems="flex-start">
               <Grid item xs={12} md={4}>

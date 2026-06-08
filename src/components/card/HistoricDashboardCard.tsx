@@ -18,6 +18,7 @@ import {
 } from 'recharts'
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
 import BasicCard from './BasicCard'
+import ChartTooltip, { CHART_COLORS } from '../reports/ChartTooltip'
 
 interface IHistoricChart {
   name: string
@@ -126,6 +127,8 @@ export default function HistoricDashboardCard() {
     height: '100%'
   }
 
+  const isDark = theme.palette.mode === 'dark'
+
   const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
     if (active && payload && payload.length) {
       const gastado: number = Number(payload.find(entry => entry.name === 'Gastado')?.value) || 0
@@ -133,12 +136,14 @@ export default function HistoricDashboardCard() {
       const restante: number = getTwoFirstDecimals(presupuestado - gastado)
 
       return (
-        <div style={{ backgroundColor: '#fff', padding: '10px', border: '1px solid #ccc' }}>
-          <b>{`${label}`}</b>
-          <p style={{ color: theme.palette.primary.main }}>{`Presupuestado: ${presupuestado} €`}</p>
-          <p style={{ color: '#FF6384' }}>{`Gastado: ${gastado} €`}</p>
-          <p style={{ color: restante <= 0 ? '#FF0042' : 'black' }}>{`Restante: ${restante} €`}</p>
-        </div>
+        <ChartTooltip
+          title={String(label)}
+          rows={[
+            { label: 'Presupuestado', value: presupuestado, color: theme.palette.primary.main },
+            { label: 'Gastado', value: gastado, color: CHART_COLORS.expense },
+            { label: 'Restante', value: restante, color: restante <= 0 ? CHART_COLORS.over : CHART_COLORS.income, bold: true }
+          ]}
+        />
       )
     }
 
@@ -147,8 +152,10 @@ export default function HistoricDashboardCard() {
 
   return (
     <BasicCard style={cardStyle}>
-      <h3 style={titleStyle}>Gastos mensuales</h3>
-      <div style={containerStyle}>
+      <h3 style={{ ...titleStyle, fontSize: isMobile ? 16 : 18, color: isDark ? '#fff' : '#222' }}>
+        Gastos mensuales (histórico)
+      </h3>
+      <div style={containerStyle} aria-label="Gráfica de gastos mensuales históricos">
         {loadingTransactions || loadingBudgets || loadingBudgetHistorics ? (
           <div style={circularProgressStyle}>
             <CircularProgress />
@@ -158,47 +165,68 @@ export default function HistoricDashboardCard() {
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
-              width={500}
-              height={400}
               data={data}
               margin={{
                 top: 10,
-                right: 30,
+                right: 16,
                 left: 0,
-                bottom: 10
+                bottom: isMobile ? 30 : 10
               }}
-              style={{ fontSize: '14px' }}
+              barCategoryGap={isMobile ? 4 : 8}
             >
-              <CartesianGrid strokeDasharray="3 3" />
+              <defs>
+                <linearGradient id="histGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={CHART_COLORS.expense} stopOpacity={0.95} />
+                  <stop offset="100%" stopColor={CHART_COLORS.expense} stopOpacity={0.55} />
+                </linearGradient>
+                <linearGradient id="histOverGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={CHART_COLORS.over} stopOpacity={0.95} />
+                  <stop offset="100%" stopColor={CHART_COLORS.over} stopOpacity={0.6} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#333' : '#e6e6e6'} vertical={false} />
               <XAxis
                 dataKey="name"
                 xAxisId={0}
-                tick={{ fontSize: isMobile ? 10 : 12 }}
+                tick={{ fontSize: isMobile ? 10 : 12, fill: isDark ? '#bbb' : '#555' }}
                 angle={isMobile ? -45 : -25}
                 textAnchor="end"
+                interval={isMobile ? 0 : 'preserveStartEnd'}
+                height={60}
               />
               <XAxis dataKey="name" xAxisId={1} hide />
-              <YAxis unit=" €" />
-              <Tooltip content={props => <CustomTooltip {...props} />} />
-              <Bar dataKey="Gastado" barSize={40} xAxisId={1} fill="#FF6384">
+              <YAxis
+                unit=" €"
+                tick={{ fontSize: isMobile ? 10 : 12, fill: isDark ? '#bbb' : '#555' }}
+                width={isMobile ? 50 : 70}
+              />
+              <Tooltip content={props => <CustomTooltip {...props} />} cursor={{ fill: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }} />
+              <Bar dataKey="Gastado" maxBarSize={42} xAxisId={1} radius={[4, 4, 0, 0]}>
                 {data.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
-                    fill={entry.Gastado >= entry.Presupuestado ? '#FF0042' : entry.Gastado < 0 ? '#00C49F' : '#FF6384'}
+                    fill={
+                      entry.Gastado >= entry.Presupuestado && entry.Presupuestado > 0
+                        ? 'url(#histOverGradient)'
+                        : entry.Gastado < 0
+                          ? CHART_COLORS.income
+                          : 'url(#histGradient)'
+                    }
                   />
                 ))}
               </Bar>
               <Bar
                 dataKey="Presupuestado"
-                barSize={42}
+                maxBarSize={44}
                 xAxisId={0}
                 fill={theme.palette.primary.main}
                 fillOpacity={0}
                 stroke={theme.palette.primary.main}
                 strokeWidth={2}
                 strokeDasharray="5 5"
+                radius={[4, 4, 0, 0]}
               />
-              <Legend verticalAlign="top" height={36} />
+              <Legend verticalAlign="top" height={28} wrapperStyle={{ fontSize: 13 }} />
             </BarChart>
           </ResponsiveContainer>
         )}

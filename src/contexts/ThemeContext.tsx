@@ -9,23 +9,23 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const { settings, updateSettings, loading } = useAppSettings()
-
-  // Initialize from localStorage to prevent flash
-  const getInitialDarkMode = (): boolean => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('darkMode')
-      if (stored !== null) {
-        return stored === 'true'
-      }
-    }
+// Lee el mismo orden que el script anti-FOUC del layout: localStorage > prefers-color-scheme > false
+const getInitialDarkMode = (): boolean => {
+  if (typeof window === 'undefined') return false
+  try {
+    const stored = localStorage.getItem('darkMode')
+    if (stored !== null) return stored === 'true'
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+  } catch {
     return false
   }
+}
 
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const { settings, updateSettings, loading } = useAppSettings()
   const [darkMode, setDarkMode] = useState<boolean>(getInitialDarkMode)
 
-  // Apply dark class to document whenever darkMode changes
+  // Mantén la clase .dark sincronizada con el estado
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark')
@@ -36,22 +36,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, [darkMode])
 
-  // Sync with settings from API
+  // Sincroniza con la preferencia almacenada en la API una vez que llega
   useEffect(() => {
-    if (settings && !loading) {
-      // Only update if different to avoid unnecessary re-renders
-      if (settings.darkMode !== darkMode) {
-        setDarkMode(settings.darkMode)
-      }
+    if (settings && !loading && settings.darkMode !== darkMode) {
+      setDarkMode(settings.darkMode)
     }
   }, [settings, loading])
 
-  const toggleDarkMode = async (value: boolean) => {
+  const toggleDarkMode = (value: boolean) => {
     setDarkMode(value)
-    // Update in localStorage immediately
-    localStorage.setItem('darkMode', value.toString())
-    // Update in database
-    await updateSettings({ darkMode: value })
+    // No bloqueamos UI esperando a la API
+    void updateSettings({ darkMode: value })
   }
 
   return (

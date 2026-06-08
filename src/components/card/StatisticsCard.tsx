@@ -1,10 +1,11 @@
 import { HomeContext } from '@/contexts/HomeContext'
 import { getTwoFirstDecimals } from '@/utils/utils'
-import { CircularProgress, useMediaQuery } from '@mui/material'
-import { CSSProperties, useContext, useEffect, useState } from 'react'
+import { CircularProgress, useMediaQuery, useTheme as useMuiTheme } from '@mui/material'
+import { CSSProperties, useContext, useEffect, useMemo, useState } from 'react'
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, TooltipProps } from 'recharts'
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
 import BasicCard from './BasicCard'
+import ChartTooltip, { PIE_PALETTE } from '../reports/ChartTooltip'
 
 interface IStatisticsChart {
   name: string
@@ -14,6 +15,9 @@ interface IStatisticsChart {
 export default function StatisticsCard() {
 
   const isTablet = useMediaQuery('(max-width: 1024px)')
+  const isMobile = useMediaQuery('(max-width: 600px)')
+  const muiTheme = useMuiTheme()
+  const isDark = muiTheme.palette.mode === 'dark'
   const [data, setData] = useState<IStatisticsChart[]>([])
 
   const { transactions, budgets, budgetHistorics, loadingTransactions, loadingBudgets, loadingBudgetHistorics } =
@@ -81,38 +85,20 @@ export default function StatisticsCard() {
     width: '100%'
   }
 
-  const COLORS = [
-    '#00C49F',
-    '#0088FE',
-    '#FFBB28',
-    '#FF8042',
-    '#FF6384',
-    '#36A2EB',
-    '#FF9F40',
-    '#4BC0C0',
-    '#FFD700',
-    '#FF69B4',
-    '#90EE90',
-    '#FFC0CB',
-    '#ADD8E6',
-    '#FFA07A',
-    '#7B68EE',
-    '#00FF7F',
-    '#FF1493',
-    '#FFDAB9',
-    '#00FFFF'
-  ]
+  const total = useMemo(() => data.reduce((acc, d) => acc + d.value, 0), [data])
 
   const CustomTooltip = ({ active, payload }: TooltipProps<ValueType, NameType>) => {
     if (active && payload && payload.length) {
-      const data = payload[0].payload as IStatisticsChart
-
+      const item = payload[0].payload as IStatisticsChart
+      const percent = total > 0 ? ((item.value / total) * 100).toFixed(1) : '0.0'
       return (
-        <div style={{ backgroundColor: '#fff', padding: '10px', border: '1px solid #ccc' }}>
-          <p>
-            <b>{data.name}</b>: {data.value} €
-          </p>
-        </div>
+        <ChartTooltip
+          title={item.name}
+          rows={[
+            { label: 'Total', value: getTwoFirstDecimals(item.value), bold: true },
+            { label: 'Porcentaje', value: `${percent} %` }
+          ]}
+        />
       )
     }
 
@@ -121,8 +107,10 @@ export default function StatisticsCard() {
 
   return (
     <BasicCard style={cardStyle}>
-      <h3 style={titleStyle}>Estadísticas por categoría</h3>
-      <div style={containerStyle}>
+      <h3 style={{ ...titleStyle, fontSize: isMobile ? 16 : 18, color: isDark ? '#fff' : '#222' }}>
+        Estadísticas por categoría
+      </h3>
+      <div style={containerStyle} aria-label="Distribución de gastos por categoría">
         {loadingTransactions || loadingBudgets || loadingBudgetHistorics ? (
           <div style={circularProgressStyle}>
             <CircularProgress />
@@ -131,22 +119,37 @@ export default function StatisticsCard() {
           <p>No hay datos para mostrar</p>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <PieChart width={400} height={isTablet ? 500 : 300} style={{ fontSize: '14px' }}>
+            <PieChart style={{ fontSize: 13 }}>
               <Pie
                 data={data}
                 cx="50%"
-                cy="50%"
+                cy={isMobile ? '40%' : '45%'}
+                innerRadius={isMobile ? 45 : 60}
+                outerRadius={isMobile ? 75 : 95}
+                paddingAngle={2}
                 labelLine={false}
-                label={({ percent }: { percent: number }) => `${(percent * 100).toFixed(0)}%`}
-                outerRadius={80}
-                fill="#8884d8"
+                label={({ percent }: { percent: number }) =>
+                  percent >= 0.05 ? `${(percent * 100).toFixed(0)}%` : ''
+                }
                 dataKey="value"
+                stroke={isDark ? '#1e1e1e' : '#fff'}
+                strokeWidth={2}
               >
                 {data.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell key={`cell-${index}`} fill={PIE_PALETTE[index % PIE_PALETTE.length]} />
                 ))}
               </Pie>
-              <Legend />
+              <Legend
+                layout="horizontal"
+                verticalAlign="bottom"
+                align="center"
+                iconType="circle"
+                wrapperStyle={{
+                  fontSize: isMobile ? 11 : 12,
+                  paddingTop: 8,
+                  color: isDark ? '#ddd' : '#333'
+                }}
+              />
               <Tooltip content={props => <CustomTooltip {...props} />} />
             </PieChart>
           </ResponsiveContainer>

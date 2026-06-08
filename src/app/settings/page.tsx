@@ -328,7 +328,7 @@ export default function Settings() {
   // STYLES
   const titleStyle: CSSProperties = {
     margin: '10px 0',
-    color: 'black'
+    color: 'var(--text-primary)'
   }
 
   const containerStyle: CSSProperties = {

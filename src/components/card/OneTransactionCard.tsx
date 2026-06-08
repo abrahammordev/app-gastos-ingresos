@@ -7,34 +7,63 @@ export interface OneTransactionCardProps {
     title: string
     category: string
     date: Date
-    amount: number,
+    amount: number
     actions: ReactNode
   }
 }
 
 export default function OneTransactionCard({ data }: OneTransactionCardProps) {
-  return (
-    <BasicCard>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
-          <b style={{ fontSize: '16px' }}>{data.title}</b>
-          <span style={{ fontSize: '14px', color: '#666' }}>{data.category}</span>
-          <span style={{ fontSize: '12px', color: '#999' }}>{data.date.toLocaleDateString()}</span>
-        </div>
+  const isIncome = data.amount > 0
+  const amountColor = isIncome ? '#00C49F' : '#FF6384'
 
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+  return (
+    <BasicCard ariaLabel={`Transacción: ${data.title}, ${Math.abs(data.amount)} euros`}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          width: '100%',
+          gap: 12
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 0 }}>
+          <strong style={{ fontSize: 16, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {data.title}
+          </strong>
           <span
             style={{
-              fontSize: '16px',
-              fontWeight: 'bold',
-              color: data.amount > 0 ? 'green' : 'red'
+              fontSize: 12,
+              color: '#fff',
+              backgroundColor: '#257CA3',
+              padding: '2px 8px',
+              borderRadius: 999,
+              alignSelf: 'flex-start',
+              maxWidth: '100%',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
             }}
           >
-            {data.amount} €
+            {data.category}
           </span>
-          <div style={{ marginTop: '4px' }}>
-            {data.actions}
-          </div>
+          <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+            {data.date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+          <span
+            style={{
+              fontSize: 17,
+              fontWeight: 700,
+              color: amountColor,
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {isIncome ? '+' : ''}{data.amount.toLocaleString('es-ES')} €
+          </span>
+          <div>{data.actions}</div>
         </div>
       </div>
     </BasicCard>

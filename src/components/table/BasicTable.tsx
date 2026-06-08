@@ -33,6 +33,38 @@ export interface HeadCell {
   id: string
   label: string
 }
+
+// Paleta semántica para números en tablas. Cumple WCAG AA en light y dark.
+// Coherente con OneBudgetCard / OneTransactionCard / CHART_COLORS.
+const COLOR_INCOME = '#00C49F'   // verde teal
+const COLOR_EXPENSE = '#FF6384'  // rosa-rojo
+const COLOR_NEUTRAL_BLUE = '#4A9ABE'
+
+type TableType = BasicTableProps['type']
+
+function getNumericCellColor(cell: string, value: number, tableType: TableType): string {
+  // Contextos de /settings donde el signo no determina el tipo (se guardan positivos en BD)
+  if (cell === 'amount') {
+    if (tableType === 'settingsMonthlyExpenseTransactions') return COLOR_EXPENSE
+    if (tableType === 'settingsMonthlyIncomeTransactions') return COLOR_INCOME
+    // Transacciones normales: el signo SÍ determina el tipo
+    return value > 0 ? COLOR_INCOME : value < 0 ? COLOR_EXPENSE : 'var(--text-primary)'
+  }
+
+  switch (cell) {
+    case 'spent':
+      return value !== 0 ? COLOR_EXPENSE : 'var(--text-primary)'
+    case 'remaining':
+      return value > 0 ? COLOR_NEUTRAL_BLUE : value < 0 ? COLOR_EXPENSE : 'var(--text-primary)'
+    case 'total':
+      return value > 0 ? COLOR_INCOME : value < 0 ? COLOR_EXPENSE : 'var(--text-primary)'
+    case 'budget':
+      // Presupuesto asignado a una categoría (vista /settings)
+      return COLOR_NEUTRAL_BLUE
+    default:
+      return 'var(--text-primary)'
+  }
+}
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface BasicTableProps<T extends { id: string | number } = { id: string } & Record<string, unknown>> {
   headCells: HeadCell[]
@@ -162,16 +194,16 @@ export default function BasicTable<T extends { id: string | number } & Record<st
                         <TableCell
                           key={index}
                           align="left"
-                          style={{
-                            color:
-                              cell === 'amount' || cell === 'remaining'
-                                ? (row[cell] as number) > 0
-                                  ? 'green'
-                                  : 'red'
-                                : 'black'
+                          sx={{
+                            color: getNumericCellColor(cell, row[cell] as number, type),
+                            fontWeight:
+                              cell === 'amount' || cell === 'remaining' || cell === 'total' || cell === 'budget'
+                                ? 600
+                                : 500,
+                            fontVariantNumeric: 'tabular-nums'
                           }}
                         >
-                          {row[cell] as number} €
+                          {(row[cell] as number).toLocaleString('es-ES')} €
                         </TableCell>
                       ) : row[cell] instanceof Date ? (
                         <TableCell key={index} align="left">

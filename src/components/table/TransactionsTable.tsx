@@ -64,10 +64,16 @@ export default function TransactionsTable({
           amount: transaction.amount,
           actions: (
             <div key={transaction.id}>
-              <IconButton onClick={() => handleEditTransaction(transaction.id)}>
+              <IconButton
+                aria-label={`Editar transacción ${transaction.title}`}
+                onClick={() => handleEditTransaction(transaction.id)}
+              >
                 <Edit color="primary" />
               </IconButton>
-              <IconButton onClick={() => handleDeleteTransaction(transaction.id)}>
+              <IconButton
+                aria-label={`Eliminar transacción ${transaction.title}`}
+                onClick={() => handleDeleteTransaction(transaction.id)}
+              >
                 <Delete color="primary" />
               </IconButton>
             </div>

@@ -83,7 +83,8 @@ function Transaction({ transaction }: { transaction: { id: number; title: string
   }
 
   const amountStyle: CSSProperties = {
-    color: transaction.amount > 0 ? 'green' : 'red',
+    color: transaction.amount > 0 ? '#00C49F' : '#FF6384',
+    fontWeight: 600,
     fontSize: '15px'
   }
 

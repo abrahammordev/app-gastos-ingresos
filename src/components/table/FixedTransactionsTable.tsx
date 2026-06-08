@@ -70,7 +70,11 @@ export default function FixedTransactionsTable({
       {isMobile ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {rows.map(row => (
-            <OneFixedTransactionCard key={row.id} data={row} />
+            <OneFixedTransactionCard
+              key={row.id}
+              data={row}
+              type={isIncome ? 'income' : 'expense'}
+            />
           ))}
           <TablePagination
             totalItems={totalItems}

@@ -1,277 +1,194 @@
 import { HomeContext } from '@/contexts/HomeContext'
-import { CircularProgress, useMediaQuery } from '@mui/material'
-import { CSSProperties, useContext, useEffect, useRef, useState } from 'react'
-import { VictoryAxis, VictoryBar, VictoryChart, VictoryGroup, VictoryTheme, VictoryTooltip } from 'victory'
-import BasicCard from './BasicCard'
 import { interpolateColor } from '@/utils/utils'
+import { CircularProgress, useMediaQuery, useTheme as useMuiTheme } from '@mui/material'
+import { CSSProperties, useContext, useEffect, useMemo, useState } from 'react'
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  TooltipProps,
+  XAxis,
+  YAxis
+} from 'recharts'
+import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
+import BasicCard from './BasicCard'
+import ChartTooltip, { CHART_COLORS } from '../reports/ChartTooltip'
 
 interface IBudgetChart {
   name: string
   Gastado: number
   Presupuestado: number
-  color?: string
-  x?: number
+  Restante: number
+  color: string
 }
 
 export default function BudgetCard() {
+  const muiTheme = useMuiTheme()
+  const isDark = muiTheme.palette.mode === 'dark'
   const { transactions, budgets, budgetHistorics, loadingTransactions, loadingBudgets, loadingBudgetHistorics } =
     useContext(HomeContext)
   const [data, setData] = useState<IBudgetChart[]>([])
   const isMobile = useMediaQuery('(max-width: 600px)')
   const isTablet = useMediaQuery('(max-width: 1024px)')
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  // STYLES
-  const titleStyle = { margin: '10px 0' }
-
-  const cardStyle = { width: isMobile ? '100%' : '100%', height: isTablet ? '500px' : '450px' }
-
-  const containerStyle: CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '10px',
-    width: '100%',
-    height: isTablet ? '400px' : '350px'
-  }
-
-  const circularProgressStyle: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100%',
-    width: '100%'
-  }
-
-  const transformValue = (value: number): number => {
-    if (Math.abs(value) < 1) return 0 // Manejo para 0
-    const log = Math.log10(Math.abs(value * value))
-    return Math.sign(value) * log * log // Escala logarítmica simétrica
-  }
-
-  const inverseTransformValue = (value: number): number => {
-    if (Math.abs(value) < 1) return 0
-    const log = Math.pow(10, Math.abs(Math.sqrt(Math.abs(value))))
-    return Math.sign(value) * Math.sqrt(log)
-  }
 
   useEffect(() => {
     const budgetData = new Map<string, IBudgetChart>()
 
-      // Merge budget data
-      ;[...(budgets ?? []), ...(budgetHistorics ?? [])].forEach(item => {
-        if (item.amount > 0) {
-          const existingEntry = budgetData.get(item.category)
-          if (existingEntry) {
-            existingEntry.Presupuestado += item.amount
-          } else {
-            budgetData.set(item.category, { name: item.category, Gastado: 0, Presupuestado: item.amount })
-          }
+    ;[...(budgets ?? []), ...(budgetHistorics ?? [])].forEach(item => {
+      if (item.amount > 0) {
+        const existing = budgetData.get(item.category)
+        if (existing) {
+          existing.Presupuestado += item.amount
+        } else {
+          budgetData.set(item.category, {
+            name: item.category,
+            Gastado: 0,
+            Presupuestado: item.amount,
+            Restante: 0,
+            color: CHART_COLORS.expense
+          })
+        }
+      }
+    })
+
+    ;(transactions ?? [])
+      .filter(transaction => transaction.category !== 'Ingresos fijos')
+      .forEach(transaction => {
+        const category = budgetData.get(transaction.category)
+        if (category) {
+          category.Gastado -= transaction.amount
+        } else {
+          budgetData.set(transaction.category, {
+            name: transaction.category,
+            Gastado: -transaction.amount,
+            Presupuestado: 0,
+            Restante: 0,
+            color: CHART_COLORS.expense
+          })
         }
       })
 
-      // Add transaction data
-      ; (transactions ?? [])
-        .filter(transaction => transaction.category !== 'Ingresos fijos')
-        .forEach(transaction => {
-          const category = budgetData.get(transaction.category)
-          if (category) {
-            category.Gastado -= transaction.amount
-          } else {
-            budgetData.set(transaction.category, {
-              name: transaction.category,
-              Gastado: -transaction.amount,
-              Presupuestado: 0
-            })
-          }
-        })
-
-    const sortedData = Array.from(budgetData.values())
+    const sorted = Array.from(budgetData.values())
       .sort((a, b) => a.name.localeCompare(b.name))
-      .map((value, index) => {
+      .map(value => {
         let color
         if (value.Gastado < 0) {
-          color = '#00C49F'
+          color = CHART_COLORS.income
+        } else if (value.Gastado > value.Presupuestado) {
+          color = CHART_COLORS.over
+        } else if (value.Presupuestado === 0) {
+          color = CHART_COLORS.expense
         } else {
-          color =
-            value.Gastado > value.Presupuestado
-              ? '#FF0042'
-              : interpolateColor(value.Gastado / value.Presupuestado, '#f7ff00', '#ff6000')
+          color = interpolateColor(value.Gastado / value.Presupuestado, '#f7ff00', '#ff6000')
         }
         return {
           ...value,
           Gastado: Number(value.Gastado.toFixed(2)),
           Presupuestado: Number(value.Presupuestado.toFixed(2)),
-          color,
-          x: index + 1
+          Restante: Number((value.Presupuestado - value.Gastado).toFixed(2)),
+          color
         }
       })
 
-    setData(sortedData)
+    setData(sorted)
   }, [budgets, transactions, budgetHistorics])
 
-  const splitTextIntoLines = (text: string, maxCharsPerLine: number): string[] => {
-    const words = text.split(' ')
-    const lines: string[] = []
-    let currentLine = ''
+  const cardStyle = { width: '100%', height: isTablet ? 500 : 460 }
 
-    words.forEach(word => {
-      if ((currentLine + word).length <= maxCharsPerLine) {
-        currentLine += `${word} `
-      } else {
-        lines.push(currentLine.trim())
-        currentLine = `${word} `
-      }
-    })
-
-    lines.push(currentLine.trim())
-
-    return lines
+  const containerStyle: CSSProperties = {
+    width: '100%',
+    height: isTablet ? 400 : 360
   }
 
-  const [chartWidth, setChartWidth] = useState<number>(800) // Valor inicial predeterminado
-
-  // Calcular el ancho del contenedor solo en el cliente
-  useEffect(() => {
-    const updateWidth = () => {
-      if (containerRef.current) {
-        setChartWidth(containerRef.current.offsetWidth)
-      }
-    }
-
-    updateWidth() // Calcular el ancho inicial
-    window.addEventListener('resize', updateWidth)
-
-    return () => {
-      window.removeEventListener('resize', updateWidth)
-    }
-  }, [])
-
-  const maxBarWidth = 42 // Ancho máximo de las barras
-  const minBarWidth = 10 // Ancho mínimo de las barras
-
-  const calculateBarWidth = () => {
-    const availableWidth = chartWidth - 60 // Espacio disponible en el gráfico (restamos márgenes mínimos)
-    const totalBars = data.length
-    const maxPossibleWidth = (availableWidth / totalBars) * 0.9 // Ajustar con un factor (e.g., 90% del espacio disponible)
-    return Math.max(minBarWidth, Math.min(maxBarWidth, maxPossibleWidth))
+  const loadingStyle: CSSProperties = {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100%'
   }
+
+  const CustomTooltip = ({ active, payload }: TooltipProps<ValueType, NameType>) => {
+    if (active && payload && payload.length) {
+      const d = payload[0].payload as IBudgetChart
+      return (
+        <ChartTooltip
+          title={d.name}
+          rows={[
+            { label: 'Presupuestado', value: d.Presupuestado, color: CHART_COLORS.budget },
+            { label: 'Gastado', value: d.Gastado, color: CHART_COLORS.expense },
+            { label: 'Restante', value: d.Restante, color: d.Restante < 0 ? CHART_COLORS.over : CHART_COLORS.income, bold: true }
+          ]}
+        />
+      )
+    }
+    return null
+  }
+
+  // Truncate long category names on mobile
+  const tickFormatter = useMemo(
+    () => (value: string) => {
+      if (!isMobile) return value
+      return value.length > 10 ? `${value.slice(0, 9)}…` : value
+    },
+    [isMobile]
+  )
 
   return (
     <BasicCard style={cardStyle}>
-      <h3 style={titleStyle}>Presupuesto</h3>
-      <div style={containerStyle} ref={containerRef}>
+      <h3 style={{ margin: '6px 0 14px', fontSize: isMobile ? 16 : 18, color: isDark ? '#fff' : '#222' }}>
+        Presupuesto por categoría
+      </h3>
+      <div style={containerStyle} aria-label="Gráfica de presupuesto por categoría">
         {loadingTransactions || loadingBudgets || loadingBudgetHistorics ? (
-          <div style={circularProgressStyle}>
+          <div style={loadingStyle}>
             <CircularProgress />
           </div>
         ) : data.length === 0 ? (
           <p>No hay datos para mostrar</p>
         ) : (
-          <VictoryChart
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-            theme={VictoryTheme.material}
-            domain={{
-              x: [0, data.length + 1],
-              y: [
-                transformValue(Math.min(0, ...data.flatMap(d => [d.Gastado, d.Presupuestado]))),
-                transformValue(Math.max(...data.flatMap(d => [d.Gastado, d.Presupuestado])))
-              ]
-            }}
-            padding={{ top: 30, bottom: 50, left: 70, right: 30 }}
-            // Ajustar dinámicamente el tamaño al ancho del contenedor
-            width={chartWidth} // Ancho dinámico basado en el contenedor
-          >
-            <VictoryAxis
-              dependentAxis
-              tickCount={12} // Aumentar la cantidad de ticks
-              tickFormat={(t: number) => `${Math.round(inverseTransformValue(t))} €`}
-              style={{
-                tickLabels: { fontSize: 14, padding: 5, fontFamily: 'Roboto, sans-serif' },
-                grid: { stroke: '#e6e6e6', strokeWidth: 0.5 }
-              }}
-            />
-            <VictoryGroup>
-              {/* Gastado */}
-              <VictoryBar
-                data={data}
-                x="x"
-                y={(d: IBudgetChart) => transformValue(d.Gastado)}
-                barWidth={calculateBarWidth()} // Calcular el ancho de la barra
-                labels={({ datum }: { datum: IBudgetChart }) => {
-                  const restante = Number(datum.Presupuestado - datum.Gastado).toFixed(2)
-                  return [
-                    `Categoría: ${datum.name}`,
-                    `Presupuestado: ${datum.Presupuestado} €`,
-                    `Gastado: ${datum.Gastado} €`,
-                    `Restante: ${restante} €`
-                  ].join('\n')
-                }}
-                style={{ data: { fill: ({ datum }: { datum?: IBudgetChart }) => datum?.color || '#000' } }}
-                labelComponent={
-                  <VictoryTooltip
-                    flyoutStyle={{
-                      fill: '#fff',
-                      stroke: '#ccc',
-                      boxShadow: '0px 0px 10px rgba(0,0,0,0.1)',
-                      borderRadius: 5
-                    }}
-                    style={{ fontSize: 14, padding: 5, fontFamily: 'Roboto, sans-serif' }}
-                    flyoutPadding={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  />
-                }
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={data}
+              margin={{ top: 10, right: 16, left: 0, bottom: isMobile ? 50 : 30 }}
+              barCategoryGap={isMobile ? 4 : 12}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#333' : '#e6e6e6'} vertical={false} />
+              <XAxis
+                dataKey="name"
+                tick={{ fontSize: isMobile ? 10 : 12, fill: isDark ? '#bbb' : '#555' }}
+                angle={isMobile ? -45 : -25}
+                textAnchor="end"
+                interval={0}
+                tickFormatter={tickFormatter}
+                height={60}
               />
-              {/* Presupuestado */}
-              <VictoryBar
-                data={data}
-                x="x"
-                y={(d: IBudgetChart) => transformValue(d.Presupuestado)}
-                labels={({ datum }: { datum: IBudgetChart }) => {
-                  const restante = Number(datum.Presupuestado - datum.Gastado).toFixed(2)
-                  return [
-                    `Categoría: ${datum.name}`,
-                    `Presupuestado: ${datum.Presupuestado} €`,
-                    `Gastado: ${datum.Gastado} €`,
-                    `Restante: ${restante} €`
-                  ].join('\n')
-                }}
-                barWidth={calculateBarWidth()} // Calcular el ancho de la barra
-                style={{ data: { stroke: '#257CA3', strokeWidth: 2, fillOpacity: 0, strokeDasharray: '5 5' } }}
-                labelComponent={
-                  <VictoryTooltip
-                    flyoutStyle={{
-                      fill: '#fff',
-                      stroke: '#ccc',
-                      boxShadow: '0px 0px 10px rgba(0,0,0,0.1)',
-                      borderRadius: 5
-                    }}
-                    style={{ fontSize: 14, padding: 5, fontFamily: 'Roboto, sans-serif' }}
-                    flyoutPadding={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  />
-                }
+              <YAxis
+                unit=" €"
+                tick={{ fontSize: isMobile ? 10 : 12, fill: isDark ? '#bbb' : '#555' }}
+                width={isMobile ? 50 : 70}
               />
-            </VictoryGroup>
-            <VictoryAxis
-              tickValues={data.map(d => d.x)} // Usa directamente los valores 'x' de las barras
-              tickFormat={t => {
-                // Encuentra el dato correspondiente basado en 't'
-                const matchedDatum = data.find(d => d.x === t)
-                if (!matchedDatum) return '' // Si no hay dato correspondiente, retorna vacío
-                // Divide el texto del nombre en líneas
-                const lines = splitTextIntoLines(matchedDatum.name || '', 12)
-                return lines.join('\n') // Une las líneas con saltos de línea
-              }}
-              style={{
-                tickLabels: {
-                  fontSize: 12,
-                  padding: 2,
-                  angle: isMobile ? -45 : -25,
-                  textAnchor: 'end',
-                  fontFamily: 'Roboto, sans-serif'
-                },
-                grid: { stroke: 'none' }
-              }}
-            />
-          </VictoryChart>
+              <Tooltip content={props => <CustomTooltip {...props} />} cursor={{ fill: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }} />
+              <Legend verticalAlign="top" height={28} wrapperStyle={{ fontSize: 13 }} />
+              <Bar dataKey="Gastado" radius={[4, 4, 0, 0]} maxBarSize={48}>
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Bar>
+              <Bar
+                dataKey="Presupuestado"
+                radius={[4, 4, 0, 0]}
+                maxBarSize={48}
+                fill="transparent"
+                stroke={CHART_COLORS.budget}
+                strokeWidth={2}
+                strokeDasharray="5 5"
+              />
+            </BarChart>
+          </ResponsiveContainer>
         )}
       </div>
     </BasicCard>

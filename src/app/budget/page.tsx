@@ -134,7 +134,7 @@ export default function Budget() {
   // STYLES
   const titleStyle = {
     margin: '10px 0',
-    color: 'black'
+    color: 'var(--text-primary)'
   }
 
   const tabsStyle = {

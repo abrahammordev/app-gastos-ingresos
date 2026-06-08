@@ -23,18 +23,18 @@ export const ConfirmGenerateReportModal = ({ open, handleClose, handleAccept }: 
   }
 
   const titleStyle: CSSProperties = {
-    color: 'black',
+    color: 'var(--text-primary)',
     fontSize: '20px',
     fontWeight: 'bold'
   }
 
   const paragraphStyle: CSSProperties = {
-    color: 'black',
+    color: 'var(--text-primary)',
     fontSize: '12px'
   }
 
   const hintStyle: CSSProperties = {
-    color: 'gray',
+    color: 'var(--text-secondary)',
     fontSize: '10px'
   }
 

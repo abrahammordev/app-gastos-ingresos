@@ -7,11 +7,22 @@ import {
   getTwoFirstDecimals,
   monthNames
 } from '@/utils/utils'
-import { Autocomplete, CircularProgress, TextField, useMediaQuery } from '@mui/material'
+import { Autocomplete, CircularProgress, TextField, useMediaQuery, useTheme as useMuiTheme } from '@mui/material'
 import { CSSProperties, useContext, useEffect, useState } from 'react'
-import { Legend, Line, LineChart, ResponsiveContainer, Tooltip, TooltipProps, XAxis, YAxis } from 'recharts'
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  TooltipProps,
+  XAxis,
+  YAxis
+} from 'recharts'
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
 import BasicCard from './BasicCard'
+import ChartTooltip, { CHART_COLORS } from '../reports/ChartTooltip'
 
 export interface ISummaryChart {
   name: string
@@ -23,6 +34,8 @@ export default function MonthDashboardCard() {
 
   const isMobile = useMediaQuery('(max-width: 600px)')
   const isTablet = useMediaQuery('(max-width: 1024px)')
+  const muiTheme = useMuiTheme()
+  const isDark = muiTheme.palette.mode === 'dark'
 
   const [title, setTitle] = useState<string>('Resumen del mes (semanas)')
   const [filter, setFilter] = useState('weekly')
@@ -306,13 +319,17 @@ export default function MonthDashboardCard() {
     if (active && payload && payload.length) {
       const gastado: number = Number(payload.find(entry => entry.name === 'Gastado')?.value) || 0
       const ingresado: number = Number(payload.find(entry => entry.name === 'Ingresado')?.value) || 0
+      const balance = Number((ingresado - gastado).toFixed(2))
 
       return (
-        <div style={{ backgroundColor: '#fff', padding: '10px', border: '1px solid #ccc' }}>
-          <b>{label}</b>
-          <p style={{ color: '#FF6384' }}>{`Gastado: ${gastado} €`}</p>
-          <p style={{ color: '#00C49F' }}>{`Ingresado: ${ingresado} €`}</p>
-        </div>
+        <ChartTooltip
+          title={String(label)}
+          rows={[
+            { label: 'Ingresado', value: ingresado, color: CHART_COLORS.income },
+            { label: 'Gastado', value: gastado, color: CHART_COLORS.expense },
+            { label: 'Balance', value: balance, color: balance >= 0 ? CHART_COLORS.income : CHART_COLORS.over, bold: true }
+          ]}
+        />
       )
     }
 
@@ -343,30 +360,58 @@ export default function MonthDashboardCard() {
           <p>No hay datos para mostrar</p>
         ) : (
           <ResponsiveContainer>
-            <LineChart
-              width={500}
-              height={400}
+            <AreaChart
               data={data}
               margin={{
                 top: 20,
-                right: 25,
+                right: 16,
                 bottom: filter !== 'weekly' ? 20 : 40,
-                left: 25
+                left: 0
               }}
-              style={{ fontSize: '14px' }}
             >
+              <defs>
+                <linearGradient id="monthExpenseGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={CHART_COLORS.expense} stopOpacity={0.5} />
+                  <stop offset="100%" stopColor={CHART_COLORS.expense} stopOpacity={0.05} />
+                </linearGradient>
+                <linearGradient id="monthIncomeGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={CHART_COLORS.income} stopOpacity={0.5} />
+                  <stop offset="100%" stopColor={CHART_COLORS.income} stopOpacity={0.05} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#333' : '#e6e6e6'} vertical={false} />
               <XAxis
                 dataKey="name"
-                tick={{ fontSize: isMobile ? 10 : 12 }}
+                tick={{ fontSize: isMobile ? 10 : 12, fill: isDark ? '#bbb' : '#555' }}
                 angle={isMobile ? -45 : -25}
                 textAnchor="end"
+                interval={isMobile ? 'preserveStartEnd' : 0}
+                height={60}
               />
-              <YAxis unit="€" />
+              <YAxis
+                unit="€"
+                tick={{ fontSize: isMobile ? 10 : 12, fill: isDark ? '#bbb' : '#555' }}
+                width={isMobile ? 50 : 70}
+              />
               <Tooltip content={props => <CustomTooltip {...props} />} />
-              <Legend verticalAlign="top" height={36} />
-              <Line dataKey="Gastado" type="monotone" fill="#FF6384" stroke="#FF6384" />
-              <Line dataKey="Ingresado" type="monotone" fill="#00C49F" stroke="#00C49F" />
-            </LineChart>
+              <Legend verticalAlign="top" height={28} wrapperStyle={{ fontSize: 13 }} />
+              <Area
+                type="monotone"
+                dataKey="Gastado"
+                stroke={CHART_COLORS.expense}
+                strokeWidth={2}
+                fill="url(#monthExpenseGradient)"
+                activeDot={{ r: 5 }}
+              />
+              <Area
+                type="monotone"
+                dataKey="Ingresado"
+                stroke={CHART_COLORS.income}
+                strokeWidth={2}
+                fill="url(#monthIncomeGradient)"
+                activeDot={{ r: 5 }}
+              />
+            </AreaChart>
           </ResponsiveContainer>
         )}
       </div>

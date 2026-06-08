@@ -85,8 +85,8 @@ export default function MonthRangePicker({ monthsSelected, setMonthsSelected, st
   }, [monthsSelected, startDayOfMonth])
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center' }}>
-      <IconButton onClick={handlePrevMonth}>
+    <div style={{ display: 'flex', alignItems: 'center' }} role="group" aria-label="Selector de rango de meses">
+      <IconButton onClick={handlePrevMonth} aria-label="Mes anterior">
         <KeyboardDoubleArrowLeft />
       </IconButton>
       <SearchParamsHandler setMonthsSelected={setMonthsSelected} />
@@ -114,7 +114,7 @@ export default function MonthRangePicker({ monthsSelected, setMonthsSelected, st
           height: '30px'
         }}
       />
-      <IconButton disabled={disabledNext} onClick={handleNextMonth}>
+      <IconButton disabled={disabledNext} onClick={handleNextMonth} aria-label="Mes siguiente">
         <KeyboardDoubleArrowRight />
       </IconButton>
     </div>

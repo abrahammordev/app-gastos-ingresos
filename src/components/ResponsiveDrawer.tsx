@@ -21,6 +21,7 @@ import { usePathname } from 'next/navigation'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { useTheme } from '@/contexts/ThemeContext'
 import TransactionModal from './modal/TransactionModal'
+import MobileBottomNav from './MobileBottomNav'
 
 const drawerWidth = 240
 
@@ -78,10 +79,13 @@ export default function ResponsiveDrawer({
     setMounted(true)
   }, [])
 
-  const navActiveColor = mounted && darkMode ? '#ffffff' : '#000000'
-  const navInactiveColor = mounted && darkMode ? '#b0b0b0' : 'gray'
-  const navActiveBg = mounted && darkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)'
-  const headerColor = mounted && darkMode ? '#ffffff' : '#000000'
+  // El script anti-FOUC del layout aplica .dark antes del render,
+  // pero usamos `mounted` para evitar mismatch SSR cuando el script no llegó a correr.
+  const safeDark = mounted && darkMode
+  const navActiveColor = safeDark ? '#ffffff' : '#1a1a1a'
+  const navInactiveColor = safeDark ? '#b0b0b0' : '#555555'
+  const navActiveBg = safeDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)'
+  const headerColor = safeDark ? '#ffffff' : '#1a1a1a'
 
   const drawer = (
     <div>
@@ -261,7 +265,13 @@ export default function ResponsiveDrawer({
             </Box>
             <Box
               component="main"
-              sx={{ flexGrow: 1, p: 3, width: { md: `calc(100% - ${drawerWidth}px)`, backgroundColor: mounted && darkMode ? '#121212' : '#F7F9FB' } }}
+              sx={{
+                flexGrow: 1,
+                p: 3,
+                width: { md: `calc(100% - ${drawerWidth}px)` },
+                backgroundColor: 'var(--bg-main)',
+                color: 'var(--text-primary)'
+              }}
             >
               <Toolbar
                 sx={{
@@ -272,10 +282,12 @@ export default function ResponsiveDrawer({
             </Box>
             {pathname !== '/transactions' && (
               <Fab
-                style={{
+                aria-label="Añadir nueva transacción"
+                sx={{
                   position: 'fixed',
-                  bottom: '20px',
-                  right: '20px'
+                  right: { xs: 16, md: 24 },
+                  bottom: { xs: 80, md: 24 },
+                  boxShadow: 6
                 }}
                 color="primary"
                 onClick={() => setAddTransaction(true)}
@@ -283,6 +295,7 @@ export default function ResponsiveDrawer({
                 <Add />
               </Fab>
             )}
+            <MobileBottomNav />
             <TransactionModal open={addTransaction} handleClose={() => setAddTransaction(false)} />
           </Box>
         )}

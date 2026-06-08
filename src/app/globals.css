@@ -85,38 +85,8 @@
   --card-border-rgb: 60, 60, 60;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-
-    --primary-glow: radial-gradient(rgba(1, 65, 255, 0.4), rgba(1, 65, 255, 0));
-    --secondary-glow: linear-gradient(
-      to bottom right,
-      rgba(1, 65, 255, 0),
-      rgba(1, 65, 255, 0),
-      rgba(1, 65, 255, 0.3)
-    );
-
-    --tile-start-rgb: 2, 13, 46;
-    --tile-end-rgb: 2, 5, 19;
-    --tile-border: conic-gradient(
-      #ffffff80,
-      #ffffff40,
-      #ffffff30,
-      #ffffff20,
-      #ffffff10,
-      #ffffff10,
-      #ffffff80
-    );
-
-    --callout-rgb: 20, 20, 20;
-    --callout-border-rgb: 108, 108, 108;
-    --card-rgb: 100, 100, 100;
-    --card-border-rgb: 200, 200, 200;
-  }
-}
+/* Nota: NO usamos @media (prefers-color-scheme) aquí.
+   El default del SO se resuelve en el script anti-FOUC del layout (capa única .dark). */
 
 * {
   box-sizing: border-box;
@@ -132,15 +102,66 @@ body {
 
 body {
   color: var(--text-primary);
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background-color: var(--bg-main);
   padding: 0 !important;
   font-family: "Inter", sans-serif;
   transition: background-color 0.3s, color 0.3s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+/* === Accesibilidad === */
+/* Focus ring visible para navegación con teclado, oculto en click ratón */
+:where(button, a, [role="button"], input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid #4A9ABE;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Solo lectura para screen readers */
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Reducir movimiento si el usuario lo prefiere */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Touch targets >= 44px en móvil (WCAG AAA) */
+@media (max-width: 600px) {
+  .MuiIconButton-root {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .MuiButton-root {
+    min-height: 44px;
+  }
+}
+
+/* Padding inferior para que el FAB / BottomNav no oculte contenido */
+@media (max-width: 899px) {
+  main.main {
+    padding-bottom: 90px !important;
+  }
 }
 
 a {
@@ -148,8 +169,3 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-}

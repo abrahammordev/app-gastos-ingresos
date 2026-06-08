@@ -125,28 +125,60 @@
   border-color: var(--border-color);
 }
 
+.dark .ant-picker .ant-picker-input > input,
+.dark .ant-picker .ant-picker-input > input::placeholder {
+  color: var(--text-primary);
+}
+
+.dark .ant-picker .ant-picker-suffix,
+.dark .ant-picker .ant-picker-clear,
+.dark .ant-picker .ant-picker-separator {
+  color: var(--text-secondary);
+  background-color: transparent;
+}
+
 .dark .ant-picker-dropdown {
   background-color: var(--bg-card);
 }
 
-.dark .ant-picker-panel-container {
+.dark .ant-picker-panel-container,
+.dark .ant-picker-panel-layout,
+.dark .ant-picker-panel,
+.dark .ant-picker-datetime-panel {
   background-color: var(--bg-card);
 }
 
-.dark .ant-picker-header {
-  border-bottom-color: var(--border-color);
+.dark .ant-picker-header,
+.dark .ant-picker-footer {
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark .ant-picker-header button,
+.dark .ant-picker-header-view {
+  color: var(--text-primary);
 }
 
 .dark .ant-picker-cell {
+  color: var(--text-secondary);
+}
+
+.dark .ant-picker-cell-in-view {
   color: var(--text-primary);
 }
 
 .dark .ant-picker-cell:hover:not(.ant-picker-cell-selected) .ant-picker-cell-inner {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 .dark .ant-picker-content th {
   color: var(--text-secondary);
+}
+
+.dark .monthRangePicker .ant-picker-input:first-child > input,
+.dark .monthRangePicker:nth-child(2) .ant-picker-input > input,
+.dark .monthPicker .ant-picker-input > input {
+  color: var(--text-primary);
 }
 
 @media (max-width: 1030px) {
