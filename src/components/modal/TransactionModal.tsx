@@ -1,5 +1,6 @@
 import { RefreshContext } from '@/contexts/RefreshContext'
 import { TransactionsContext } from '@/contexts/TransactionsContext'
+import { useToast } from '@/contexts/ToastContext'
 import { ICategories, ITransaction } from '@/types/index'
 import { Autocomplete, Button, TextField, useMediaQuery } from '@mui/material'
 import { CSSProperties, ChangeEvent, useContext, useEffect, useMemo, useRef, useState } from 'react'
@@ -14,6 +15,7 @@ interface TransactionModalProps {
 
 export default function TransactionModal({ open, handleClose, transaction }: TransactionModalProps) {
   const inputRef = useRef<HTMLInputElement>()
+  const toast = useToast()
 
   const isMobile = useMediaQuery('(max-width: 600px)')
   const [type, setType] = useState<'income' | 'expense'>('expense')
@@ -129,10 +131,14 @@ export default function TransactionModal({ open, handleClose, transaction }: Tra
         if (refreshTransactions) {
           refreshTransactions()
         }
+        toast.success(transaction ? 'Transacción actualizada' : 'Transacción añadida')
         handleResetModal(!!transaction, date)
+      } else {
+        toast.error('No se pudo guardar la transacción')
       }
     } catch (error) {
       console.error('Failed to save transaction', error)
+      toast.error('Error de red al guardar la transacción')
     } finally {
       setLoading(false)
     }

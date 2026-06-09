@@ -2,6 +2,7 @@ import { RefreshContext } from '@/contexts/RefreshContext'
 import { SettingsBudgetsContext } from '@/contexts/SettingsBudgetsContext'
 import { SettingsCategoriesContext } from '@/contexts/SettingsCategoriesContext'
 import { SettingsMonthlyExpenseTransactionsContext } from '@/contexts/SettingsMonthlyExpenseTransactionsContext'
+import { useToast } from '@/contexts/ToastContext'
 import useFetch from '@/hooks/useFetch'
 import { ICategories, IMonthlyTransactions, ITransactions } from '@/types/index'
 import customFetch from '@/utils/fetchWrapper'
@@ -17,6 +18,7 @@ export interface DeleteCategoryModalProps {
 
 export default function DeleteCategoryModal({ open, handleClose, category }: DeleteCategoryModalProps) {
   const isMobile = useMediaQuery('(max-width: 600px)')
+  const toast = useToast()
   const [categories, setCategories] = useState<string[] | null>(null)
 
   const { refreshCategories, refreshKeyCategories } = useContext(RefreshContext)
@@ -197,29 +199,19 @@ export default function DeleteCategoryModal({ open, handleClose, category }: Del
     setLoading(true)
 
     try {
-      // Create the category if it doesn't exist
       await createCategory()
-
-      // Update transactions only if createCategory succeeds
       await updateTransactions()
-
-      // Update monthly transactions only if updateTransactions succeeds
       await updateMonthlyTransactions()
-
-      // Delete budgets only if updateMonthlyTransactions succeeds
       await deleteBudgets()
-
-      // Delete budget historics only if deleteBudgets succeeds
       await deleteBudgetHistorics()
-
-      // Delete the category budget only if deleteBudgetHistorics succeeds
       await deleteCategorySelected()
+      toast.success('Categoría eliminada')
     } catch (error) {
       console.error('An error occurred:', error)
-      // Optionally, handle any specific cleanup or recovery from the error here
+      toast.error('Ocurrió un error al eliminar la categoría')
     } finally {
       setLoading(false)
-      handleClose() // Assuming you want to close regardless of success or failure
+      handleClose()
     }
   }
 

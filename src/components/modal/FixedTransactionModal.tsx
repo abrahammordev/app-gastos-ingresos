@@ -1,5 +1,6 @@
 import { RefreshContext } from '@/contexts/RefreshContext'
 import { SettingsMonthlyIncomeTransactionsContext } from '@/contexts/SettingsMonthlyIncomeTransactionsContext'
+import { useToast } from '@/contexts/ToastContext'
 import { ICategories, IMonthlyTransaction } from '@/types/index'
 import customFetch from '@/utils/fetchWrapper'
 import { Autocomplete, Button, TextField, useMediaQuery } from '@mui/material'
@@ -21,6 +22,7 @@ export default function FixedTransactionModal({
   monthlyTransaction = null
 }: FixedTransactionModalProps) {
   const inputRef = useRef<HTMLInputElement>()
+  const toast = useToast()
 
   const isMobile = useMediaQuery('(max-width: 600px)')
   const [amount, setAmount] = useState('')
@@ -129,10 +131,14 @@ export default function FixedTransactionModal({
         } else {
           refreshExpense(pageExpense, limitExpense, sortByExpense, sortOrderExpense, filtersExpense)
         }
+        toast.success(monthlyTransaction ? 'Movimiento fijo actualizado' : 'Movimiento fijo añadido')
         handleResetModal(method === 'PUT')
+      } else {
+        toast.error('No se pudo guardar el movimiento fijo')
       }
     } catch (error) {
       console.error('Failed to process transaction', error)
+      toast.error('Error de red al guardar el movimiento fijo')
     } finally {
       setLoading(false)
     }

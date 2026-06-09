@@ -5,6 +5,7 @@ import HistoricDashboardCard from '@/components/card/HistoricDashboardCard'
 import KpiSummaryCard from '@/components/card/KpiSummaryCard'
 import MonthDashboardCard from '@/components/card/MonthDashboardCard'
 import StatisticsCard from '@/components/card/StatisticsCard'
+import TopCategoriesCard from '@/components/card/TopCategoriesCard'
 import TransactionsCard from '@/components/card/TransactionsCard'
 import ExportCsvButton from '@/components/ExportCsvButton'
 import DownloadReportButton from '@/components/reports/DownloadReportButton'
@@ -15,6 +16,7 @@ import useAppSettings from '@/hooks/useAppSettings'
 import { IBudgetHistorics, IBudgets, IMonthlyTransactions, ITransaction } from '@/types/index'
 import customFetch from '@/utils/fetchWrapper'
 import { formatDate, getTwoFirstDecimals, getCurrentFiscalMonthRange } from '@/utils/utils'
+import { shiftRangeOneMonthBack } from '@/utils/comparePeriods'
 import { Info } from '@mui/icons-material'
 import { CircularProgress, Tooltip, useMediaQuery, Grid, Stack, Typography } from '@mui/material'
 import { Suspense, useContext, useEffect, useState } from 'react'
@@ -40,6 +42,7 @@ export default function Home() {
   const [budget, setBudget] = useState<number>(0)
   const [present, setPresent] = useState<boolean>(true)
   const [transactions, setTransactions] = useState<ITransaction[] | null>([])
+  const [previousTransactions, setPreviousTransactions] = useState<ITransaction[] | null>(null)
   const [loadingTransactions, setLoadingTransactions] = useState<boolean>(true)
 
   const isMobile = useMediaQuery('(max-width: 600px)')
@@ -55,12 +58,24 @@ export default function Home() {
   useEffect(() => {
     const fetchTransactions = async () => {
       setLoadingTransactions(true)
-      const response = await customFetch(
-        `/api/transactions?startDate=${monthsSelected[0]}&endDate=${monthsSelected[1]}&sortBy=date&sortOrder=desc`
-      )
+      const [prevStart, prevEnd] = shiftRangeOneMonthBack(monthsSelected)
+      const [currentRes, previousRes] = await Promise.all([
+        customFetch(`/api/transactions?startDate=${monthsSelected[0]}&endDate=${monthsSelected[1]}&sortBy=date&sortOrder=desc`),
+        prevStart && prevEnd
+          ? customFetch(`/api/transactions?startDate=${prevStart}&endDate=${prevEnd}&sortBy=date&sortOrder=desc`)
+          : Promise.resolve(null)
+      ])
 
-      const { transactions } = await response.json() as { transactions: ITransaction[] }
+      const { transactions } = await currentRes.json() as { transactions: ITransaction[] }
       setTransactions(transactions)
+
+      if (previousRes) {
+        const { transactions: prevTx } = await previousRes.json() as { transactions: ITransaction[] }
+        setPreviousTransactions(prevTx)
+      } else {
+        setPreviousTransactions(null)
+      }
+
       setLoadingTransactions(false)
     }
 
@@ -178,6 +193,7 @@ export default function Home() {
           budget,
           setBudget,
           transactions,
+          previousTransactions,
           budgets: present ? (budgetsData ? budgetsData.budgets : []) : null,
           budgetHistorics: contextBudgetHistorics,
           loadingTransactions,
@@ -199,7 +215,12 @@ export default function Home() {
               alignItems={isMobile ? 'unset' : 'center'}
               spacing={isMobile ? 0 : 1}
             >
-              {!sideBarCollapsed && <Typography variant="h5" color="Grey" my={1}>Dashboard</Typography>}
+              {!sideBarCollapsed && (
+                <div>
+                  <h2 className="page-title">Dashboard</h2>
+                  <p className="page-subtitle">Resumen de tu actividad financiera</p>
+                </div>
+              )}
               <MonthRangePicker
                 monthsSelected={monthsSelected}
                 setMonthsSelected={setMonthsSelected}
@@ -227,14 +248,24 @@ export default function Home() {
           <Stack direction="column" spacing={2} alignItems="center">
             <KpiSummaryCard />
             <BudgetCard />
-            <Grid container spacing={2} justifyContent="center" alignItems="flex-start">
-              <Grid item xs={12} md={4}>
+            <Grid
+              container
+              rowSpacing={2}
+              columnSpacing={{ xs: 0, md: 2 }}
+              justifyContent="center"
+              alignItems="flex-start"
+              sx={{ width: '100%', minWidth: 0 }}
+            >
+              <Grid item xs={12} md={3} sx={{ minWidth: 0 }}>
                 <TransactionsCard />
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={3} sx={{ minWidth: 0 }}>
+                <TopCategoriesCard />
+              </Grid>
+              <Grid item xs={12} md={3} sx={{ minWidth: 0 }}>
                 <MonthDashboardCard />
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={3} sx={{ minWidth: 0 }}>
                 <StatisticsCard />
               </Grid>
             </Grid>

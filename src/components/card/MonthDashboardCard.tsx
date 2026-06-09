@@ -284,10 +284,13 @@ export default function MonthDashboardCard() {
   }, [filter, transactions])
 
   // STYLES
-  const headerStyle = {
+  const headerStyle: CSSProperties = {
     display: 'flex',
+    flexDirection: isMobile ? 'column' : 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: isMobile ? 'stretch' : 'center',
+    gap: isMobile ? 4 : 0,
+    minWidth: 0
   }
 
   const titleStyle = {
@@ -341,7 +344,7 @@ export default function MonthDashboardCard() {
       <div style={headerStyle}>
         <h3 style={titleStyle}>{title}</h3>
         <Autocomplete
-          sx={{ m: 1, width: 130 }}
+          sx={{ m: isMobile ? 0 : 1, width: isMobile ? '100%' : 130 }}
           size="small"
           options={filterOptions}
           value={filterOptions.find(option => option.value === filter)}

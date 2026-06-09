@@ -6,9 +6,10 @@ import useAppSettings from '@/hooks/useAppSettings'
 import { IBudget, IBudgetHistoric, ITransaction } from '@/types/index'
 import customFetch from '@/utils/fetchWrapper'
 import { formatDate, getCurrentFiscalMonthRange, handleDateFilterChange } from '@/utils/utils'
-import { Autocomplete, CircularProgress, Tab, Tabs, TextField, useMediaQuery } from '@mui/material'
-import { SyntheticEvent, useCallback, useContext, useEffect, useState } from 'react'
+import { Autocomplete, CircularProgress, TextField, useMediaQuery } from '@mui/material'
+import { useCallback, useContext, useEffect, useState } from 'react'
 import '../../styles.css'
+import PillTabs from '@/components/PillTabs'
 
 export default function Budget() {
   const today = new Date()
@@ -84,7 +85,7 @@ export default function Budget() {
     { label: 'Todo', value: 'all' }
   ]
 
-  const handleChangeTab = (_: SyntheticEvent, newValue: number) => {
+  const handleChangeTab = (newValue: number) => {
     setValue(newValue)
     if (newValue === 1) {
       setFilter('all')
@@ -131,19 +132,14 @@ export default function Budget() {
     }
   }, [monthsSelected])
 
-  // STYLES
-  const titleStyle = {
-    margin: '10px 0',
-    color: 'var(--text-primary)'
-  }
-
   const tabsStyle = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    marginBottom: '10px',
-    height: '56px'
+    marginBottom: '14px',
+    gap: '12px',
+    flexWrap: 'wrap' as const
   }
 
   const buttonsStyle = {
@@ -152,6 +148,11 @@ export default function Budget() {
     alignItems: 'center',
     gap: '10px'
   }
+
+  const budgetTabOptions = [
+    { label: 'Este mes', value: 0 },
+    { label: 'Historial', value: 1 }
+  ]
 
   return (
     <main className="main">
@@ -177,7 +178,14 @@ export default function Budget() {
           handleChangeFilters: (newFilters: Record<string, string>) => setFilters(newFilters)
         }}
       >
-        {!sideBarCollapsed && <h2 style={titleStyle}>Presupuesto</h2>}
+        {!sideBarCollapsed && (
+          <header className="page-header">
+            <div>
+              <h2 className="page-title">Presupuesto</h2>
+              <p className="page-subtitle">Controla tus límites por categoría</p>
+            </div>
+          </header>
+        )}
         <div>
           {isMobile && value === 1 && (
             <div style={{ ...buttonsStyle, justifyContent: 'flex-start', marginBottom: '10px' }}>
@@ -194,22 +202,13 @@ export default function Budget() {
             </div>
           )}
           <div style={tabsStyle}>
-            <Tabs value={value} onChange={handleChangeTab} variant={isMobile ? 'fullWidth' : 'standard'}>
-              <Tab
-                classes={{
-                  selected: 'tabSelected'
-                }}
-                label="Este mes"
-                value={0}
-              />
-              <Tab
-                classes={{
-                  selected: 'tabSelected'
-                }}
-                label="Historial"
-                value={1}
-              />
-            </Tabs>
+            <PillTabs
+              options={budgetTabOptions}
+              value={value}
+              onChange={handleChangeTab}
+              fullWidth={isMobile}
+              ariaLabel="Periodo de presupuesto"
+            />
             {!isMobile && value === 1 && (
               <div style={buttonsStyle}>
                 <Autocomplete

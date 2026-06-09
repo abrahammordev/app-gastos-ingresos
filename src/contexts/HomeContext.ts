@@ -9,6 +9,7 @@ interface HomeContextType {
   budget?: number;
   setBudget?: (value: number) => void;
   transactions: ITransaction[] | null;
+  previousTransactions?: ITransaction[] | null;
   budgets: IBudget[] | null;
   budgetHistorics: IBudgetHistoric[] | null;
   loadingTransactions: boolean;
@@ -23,6 +24,7 @@ const defaultValue: HomeContextType = {
   budget: 0,
   setBudget: () => { },
   transactions: null,
+  previousTransactions: null,
   budgets: null,
   budgetHistorics: null,
   loadingTransactions: true,

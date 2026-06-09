@@ -33,10 +33,11 @@ export default function OneTransactionCard({ data }: OneTransactionCardProps) {
           </strong>
           <span
             style={{
-              fontSize: 12,
-              color: '#fff',
-              backgroundColor: '#257CA3',
-              padding: '2px 8px',
+              fontSize: 11,
+              fontWeight: 600,
+              color: 'var(--brand)',
+              backgroundColor: 'var(--brand-soft)',
+              padding: '3px 9px',
               borderRadius: 999,
               alignSelf: 'flex-start',
               maxWidth: '100%',

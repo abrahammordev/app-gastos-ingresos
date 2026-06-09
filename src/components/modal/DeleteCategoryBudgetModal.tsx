@@ -2,6 +2,7 @@ import { RefreshContext } from '@/contexts/RefreshContext'
 import { SettingsBudgetsContext } from '@/contexts/SettingsBudgetsContext'
 import { SettingsCategoriesContext } from '@/contexts/SettingsCategoriesContext'
 import { SettingsMonthlyExpenseTransactionsContext } from '@/contexts/SettingsMonthlyExpenseTransactionsContext'
+import { useToast } from '@/contexts/ToastContext'
 import useFetch from '@/hooks/useFetch'
 import { IBudget, ICategories, IMonthlyTransactions, ITransactions } from '@/types/index'
 import customFetch from '@/utils/fetchWrapper'
@@ -21,6 +22,7 @@ export default function DeleteCategoryBudgetModal({
   categoryBudget
 }: DeleteCategoryBudgetModalProps) {
   const isMobile = useMediaQuery('(max-width: 600px)')
+  const toast = useToast()
   const [categories, setCategories] = useState<string[] | null>(null)
 
   const { refreshCategories, refreshKeyCategories } = useContext(RefreshContext)
@@ -67,10 +69,14 @@ export default function DeleteCategoryBudgetModal({
 
       if (response.ok) {
         refreshBudgets(sortBy, sortOrder, filters)
+        toast.success('Presupuesto eliminado')
         handleClose()
+      } else {
+        toast.error('No se pudo eliminar el presupuesto')
       }
     } catch (error) {
       console.error(error)
+      toast.error('Error de red al eliminar el presupuesto')
     }
 
     setLoading(false)
@@ -216,29 +222,19 @@ export default function DeleteCategoryBudgetModal({
     setLoading(true)
 
     try {
-      // Create the category if it doesn't exist
       await createCategory()
-
-      // Update transactions only if createCategory succeeds
       await updateTransactions()
-
-      // Update monthly transactions only if updateTransactions succeeds
       await updateMonthlyTransactions()
-
-      // Delete budgets only if updateMonthlyTransactions succeeds
       await deleteBudgets()
-
-      // Delete budget historics only if deleteBudgets succeeds
       await deleteBudgetHistorics()
-
-      // Delete the category budget only if deleteBudgetHistorics succeeds
       await deleteCategoryBudget()
+      toast.success('Categoría y presupuesto eliminados')
     } catch (error) {
       console.error('An error occurred:', error)
-      // Optionally, handle any specific cleanup or recovery from the error here
+      toast.error('Ocurrió un error al eliminar la categoría')
     } finally {
       setLoading(false)
-      handleClose() // Assuming you want to close regardless of success or failure
+      handleClose()
     }
   }
 

@@ -6,13 +6,162 @@
 
 /* Tabs */
 .tabSelected {
-  color: #257CA3 !important;
+  color: var(--brand) !important;
 }
 
-/* Modal */
-.backdropModal{
-  background-color: var(--bg-card) !important;
-  border-radius: 4px !important;
+/* Page header */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 4px 0 16px;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 2px 0 0;
+}
+
+/* Pill tabs (Headless UI based) */
+.pill-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+}
+
+.pill-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  transition: background-color .15s, color .15s;
+}
+
+.pill-tab:hover {
+  color: var(--text-primary);
+}
+
+.pill-tab[data-selected="true"],
+.pill-tab[aria-selected="true"] {
+  color: var(--brand);
+  background-color: var(--brand-soft);
+}
+
+.pill-tab-fullwidth {
+  flex: 1;
+  justify-content: center;
+}
+
+/* Modal (Headless UI) */
+.modal-root {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.dark .modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.65);
+}
+
+.modal-container {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.modal-panel {
+  position: relative;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 28px 24px 24px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 20px 40px -8px rgba(0, 0, 0, 0.18);
+  max-width: min(640px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+
+.dark .modal-panel {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.4),
+    0 20px 40px -8px rgba(0, 0, 0, 0.6);
+}
+
+/* Modal transitions */
+.modal-backdrop-enter,
+.modal-backdrop-leave {
+  transition: opacity 200ms ease-out;
+}
+
+.modal-backdrop-from {
+  opacity: 0;
+}
+
+.modal-backdrop-to {
+  opacity: 1;
+}
+
+.modal-panel-enter {
+  transition: opacity 220ms ease-out, transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-panel-leave {
+  transition: opacity 160ms ease-in, transform 160ms ease-in;
+}
+
+.modal-panel-from {
+  opacity: 0;
+  transform: translateY(8px) scale(0.97);
+}
+
+.modal-panel-to {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+@media (max-width: 600px) {
+  .modal-panel {
+    border-radius: 18px;
+    padding: 24px 18px 20px;
+  }
 }
 
 /* Month range picker */

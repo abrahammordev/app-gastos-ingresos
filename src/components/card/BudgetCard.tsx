@@ -1,6 +1,6 @@
 import { HomeContext } from '@/contexts/HomeContext'
 import { interpolateColor } from '@/utils/utils'
-import { CircularProgress, useMediaQuery, useTheme as useMuiTheme } from '@mui/material'
+import { CircularProgress, Divider, useMediaQuery, useTheme as useMuiTheme } from '@mui/material'
 import { CSSProperties, useContext, useEffect, useMemo, useState } from 'react'
 import {
   Bar,
@@ -16,6 +16,7 @@ import {
 } from 'recharts'
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
 import BasicCard from './BasicCard'
+import OneBudgetCard from './OneBudgetCard'
 import ChartTooltip, { CHART_COLORS } from '../reports/ChartTooltip'
 
 interface IBudgetChart {
@@ -97,18 +98,13 @@ export default function BudgetCard() {
     setData(sorted)
   }, [budgets, transactions, budgetHistorics])
 
-  const cardStyle = { width: '100%', height: isTablet ? 500 : 460 }
-
-  const containerStyle: CSSProperties = {
-    width: '100%',
-    height: isTablet ? 400 : 360
-  }
+  const isLoading = loadingTransactions || loadingBudgets || loadingBudgetHistorics
 
   const loadingStyle: CSSProperties = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    height: '100%'
+    padding: '32px 0'
   }
 
   const CustomTooltip = ({ active, payload }: TooltipProps<ValueType, NameType>) => {
@@ -128,39 +124,77 @@ export default function BudgetCard() {
     return null
   }
 
-  // Truncate long category names on mobile
   const tickFormatter = useMemo(
-    () => (value: string) => {
-      if (!isMobile) return value
-      return value.length > 10 ? `${value.slice(0, 9)}…` : value
-    },
-    [isMobile]
+    () => (value: string) => value.length > 10 ? `${value.slice(0, 9)}…` : value,
+    []
   )
 
-  return (
-    <BasicCard style={cardStyle}>
-      <h3 style={{ margin: '6px 0 14px', fontSize: isMobile ? 16 : 18, color: isDark ? '#fff' : '#222' }}>
-        Presupuesto por categoría
-      </h3>
-      <div style={containerStyle} aria-label="Gráfica de presupuesto por categoría">
-        {loadingTransactions || loadingBudgets || loadingBudgetHistorics ? (
+  const title = (
+    <h3 style={{ margin: '6px 0 14px', fontSize: isMobile ? 16 : 18, color: isDark ? '#fff' : '#222' }}>
+      Presupuesto por categoría
+    </h3>
+  )
+
+  // ── Mobile: flat list with dividers inside a single card ─────────────────
+  if (isMobile) {
+    return (
+      <BasicCard style={{ width: '100%', overflow: 'hidden' }}>
+        {title}
+        {isLoading ? (
           <div style={loadingStyle}>
             <CircularProgress />
           </div>
         ) : data.length === 0 ? (
-          <p>No hay datos para mostrar</p>
+          <p style={{ fontSize: 14, color: isDark ? '#9a9a9a' : '#6b7280' }}>No hay datos para mostrar</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, width: '100%' }}>
+            {data.map((item, index) => (
+              <div key={item.name}>
+                {index > 0 && (
+                  <Divider sx={{ my: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
+                )}
+                <OneBudgetCard
+                  flat
+                  data={{
+                    id: item.name,
+                    category: item.name,
+                    spent: item.Gastado,
+                    remaining: item.Restante,
+                    total: item.Presupuestado
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </BasicCard>
+    )
+  }
+
+  // ── Tablet / Desktop: bar chart ────────────────────────────────────────────
+  const cardStyle = { width: '100%', height: isTablet ? 500 : 460, overflow: 'hidden' as const }
+  const containerStyle: CSSProperties = { width: '100%', height: isTablet ? 400 : 360 }
+
+  return (
+    <BasicCard style={cardStyle}>
+      {title}
+      <div style={containerStyle} aria-label="Gráfica de presupuesto por categoría">
+        {isLoading ? (
+          <div style={{ ...loadingStyle, height: '100%' }}><CircularProgress /></div>
+        ) : data.length === 0 ? (
+          <p style={{ fontSize: 14, color: isDark ? '#9a9a9a' : '#6b7280' }}>No hay datos para mostrar</p>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}
-              margin={{ top: 10, right: 16, left: 0, bottom: isMobile ? 50 : 30 }}
-              barCategoryGap={isMobile ? 4 : 12}
+              margin={{ top: 10, right: 16, left: 0, bottom: 30 }}
+              barCategoryGap={12}
             >
               <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#333' : '#e6e6e6'} vertical={false} />
               <XAxis
                 dataKey="name"
-                tick={{ fontSize: isMobile ? 10 : 12, fill: isDark ? '#bbb' : '#555' }}
-                angle={isMobile ? -45 : -25}
+                tick={{ fontSize: 12, fill: isDark ? '#bbb' : '#555' }}
+                angle={-25}
                 textAnchor="end"
                 interval={0}
                 tickFormatter={tickFormatter}
@@ -168,8 +202,8 @@ export default function BudgetCard() {
               />
               <YAxis
                 unit=" €"
-                tick={{ fontSize: isMobile ? 10 : 12, fill: isDark ? '#bbb' : '#555' }}
-                width={isMobile ? 50 : 70}
+                tick={{ fontSize: 12, fill: isDark ? '#bbb' : '#555' }}
+                width={70}
               />
               <Tooltip content={props => <CustomTooltip {...props} />} cursor={{ fill: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }} />
               <Legend verticalAlign="top" height={28} wrapperStyle={{ fontSize: 13 }} />

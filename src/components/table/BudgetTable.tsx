@@ -1,6 +1,8 @@
 import { BudgetsContext } from '@/contexts/BudgetsContext'
+import { Calculate } from '@mui/icons-material'
 import { useMediaQuery } from '@mui/material'
 import { useContext, useEffect, useRef, useState } from 'react'
+import EmptyState from '../EmptyState'
 import OneBudgetCard from '../card/OneBudgetCard'
 import BasicTable from './BasicTable'
 import { TablePagination } from './TablePagination'
@@ -66,6 +68,16 @@ export default function BudgetTable({ includeHistorics = false }: BudgetTablePro
 
     setRows(data)
   }, [transactions, budgets, includeHistorics])
+
+  if (rows.length === 0) {
+    return (
+      <EmptyState
+        icon={<Calculate sx={{ fontSize: 28 }} />}
+        title="Aún no hay presupuestos para este periodo"
+        description="Define un límite de gasto por categoría para empezar a controlar tus finanzas."
+      />
+    )
+  }
 
   return (
     <>

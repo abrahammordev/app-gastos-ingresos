@@ -1,11 +1,12 @@
 import { SettingsBudgetsContext } from '@/contexts/SettingsBudgetsContext'
 import { IBudget } from '@/types/index'
-import { Add } from '@mui/icons-material'
+import { Add, ContentCopy } from '@mui/icons-material'
 import { Button, useMediaQuery } from '@mui/material'
 import { CSSProperties, useContext, useState } from 'react'
 import MonthPicker from '../MonthPicker'
 import AddCategoryBudgetModal from '../modal/AddCategoryBudgetModal'
 import DeleteCategoryBudgetModal from '../modal/DeleteCategoryBudgetModal'
+import DuplicateBudgetModal from '../modal/DuplicateBudgetModal'
 import EditCategoryBudgetModal from '../modal/EditCategoryBudgetModal'
 import CategoriesBudgetTable from '../table/CategoriesBudgetTable'
 import BasicCard from './BasicCard'
@@ -19,9 +20,10 @@ export default function CategoriesBudgetCard({ setMonthSelected }: CategoriesBud
   const [addCategoryBudget, setAddCategoryBudget] = useState(false)
   const [editCategoryBudget, setEditCategoryBudget] = useState(false)
   const [deleteCategoryBudget, setDeleteCategoryBudget] = useState(false)
+  const [duplicateBudget, setDuplicateBudget] = useState(false)
   const [categoryBudget, setCategoryBudget] = useState<IBudget | null>(null)
 
-  const { budgets } = useContext(SettingsBudgetsContext)
+  const { budgets, refreshBudgets, sortBy, sortOrder, filters } = useContext(SettingsBudgetsContext)
 
   const handleEditCategoryBudget = (id: number) => {
     const categoryBudget = budgets?.find(budget => budget.id === id)
@@ -70,9 +72,21 @@ export default function CategoriesBudgetCard({ setMonthSelected }: CategoriesBud
           <span>Presupuesto por categorías - </span>
           <MonthPicker setMonthSelected={setMonthSelected} />
         </h3>
-        <Button variant="contained" color="primary" endIcon={<Add />} onClick={() => setAddCategoryBudget(true)}>
-          Añadir
-        </Button>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Button
+            variant="outlined"
+            color="inherit"
+            size="small"
+            startIcon={<ContentCopy fontSize="small" />}
+            onClick={() => setDuplicateBudget(true)}
+            sx={{ fontSize: 12, borderColor: 'divider', color: 'text.secondary' }}
+          >
+            {isTablet ? '' : 'Duplicar mes anterior'}
+          </Button>
+          <Button variant="contained" color="primary" endIcon={<Add />} onClick={() => setAddCategoryBudget(true)}>
+            Añadir
+          </Button>
+        </div>
       </div>
       <div style={containerStyle}>
         <CategoriesBudgetTable
@@ -81,6 +95,11 @@ export default function CategoriesBudgetCard({ setMonthSelected }: CategoriesBud
         />
       </div>
       <AddCategoryBudgetModal open={addCategoryBudget} handleClose={() => setAddCategoryBudget(false)} />
+      <DuplicateBudgetModal
+        open={duplicateBudget}
+        handleClose={() => setDuplicateBudget(false)}
+        onSuccess={() => refreshBudgets(sortBy, sortOrder, filters)}
+      />
       <EditCategoryBudgetModal
         open={editCategoryBudget}
         handleClose={() => setEditCategoryBudget(false)}

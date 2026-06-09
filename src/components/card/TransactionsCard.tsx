@@ -1,7 +1,9 @@
 import { HomeContext } from '@/contexts/HomeContext'
+import { ReceiptLong } from '@mui/icons-material'
 import { CircularProgress, useMediaQuery } from '@mui/material'
 import { CSSProperties, useContext } from 'react'
 import BasicCard from './BasicCard'
+import EmptyState from '../EmptyState'
 
 export default function TransactionsCard() {
 
@@ -43,7 +45,12 @@ export default function TransactionsCard() {
             <CircularProgress />
           </div>
         ) : transactions && transactions.length == 0 ? (
-          <p>No hay datos para mostrar</p>
+          <EmptyState
+            icon={<ReceiptLong sx={{ fontSize: 28 }} />}
+            title="Sin movimientos"
+            description="Aún no hay transacciones en este periodo."
+            compact
+          />
         ) : (
           transactions &&
           transactions.slice(0, 5).map((transaction, index) => (
@@ -64,18 +71,23 @@ function Transaction({ transaction }: { transaction: { id: number; title: string
     display: 'flex',
     justifyContent: 'space-between',
     gap: '20px',
-    alignItems: 'center'
+    alignItems: 'center',
+    minWidth: 0
   }
 
   const descriptionStyle: CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     gap: '5px',
-    maxWidth: '70%'
+    flex: 1,
+    minWidth: 0
   }
 
   const titleStyle = {
-    fontSize: '15px'
+    fontSize: '15px',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap'
   }
 
   const dateStyle: CSSProperties = {
@@ -85,7 +97,9 @@ function Transaction({ transaction }: { transaction: { id: number; title: string
   const amountStyle: CSSProperties = {
     color: transaction.amount > 0 ? '#00C49F' : '#FF6384',
     fontWeight: 600,
-    fontSize: '15px'
+    fontSize: '15px',
+    flexShrink: 0,
+    whiteSpace: 'nowrap'
   }
 
   return (

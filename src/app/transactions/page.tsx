@@ -7,10 +7,11 @@ import { ITransaction } from '@/types/index'
 import customFetch from '@/utils/fetchWrapper'
 import { formatDate, getCurrentFiscalMonthRange } from '@/utils/utils'
 import { Add } from '@mui/icons-material'
-import { Button, CircularProgress, Tab, Tabs, useMediaQuery } from '@mui/material'
-import { Suspense, SyntheticEvent, useCallback, CSSProperties, useEffect, useState } from 'react'
+import { Button, CircularProgress, useMediaQuery } from '@mui/material'
+import { Suspense, useCallback, CSSProperties, useEffect, useState } from 'react'
 import '../../styles.css'
 import MonthRangePicker from '@/components/MonthRangePicker'
+import PillTabs from '@/components/PillTabs'
 
 export default function Transactions() {
   const today = new Date()
@@ -78,7 +79,7 @@ export default function Transactions() {
     fetchTransactions().catch(error => console.error('Failed to fetch transactions:', error))
   }, [refreshKey, monthsSelected, page, limit, sortBy, sortOrder, type, filters])
 
-  const handleChangeTab = (_: SyntheticEvent, newTabValue: number) => {
+  const handleChangeTab = (newTabValue: number) => {
     setValue(newTabValue)
     switch (newTabValue) {
       case 0:
@@ -121,15 +122,14 @@ export default function Transactions() {
     )
   }
 
-  // STYLES
-  const titleStyle = { margin: '10px 0', color: 'var(--text-primary)' }
-
-  const tabsStyle = {
+  const tabsStyle: CSSProperties = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    marginBottom: '10px'
+    marginBottom: '14px',
+    gap: '12px',
+    flexWrap: 'wrap'
   }
 
   const buttonsStyle: CSSProperties = {
@@ -139,6 +139,12 @@ export default function Transactions() {
     gap: '10px',
     flexWrap: isMobile ? 'wrap' : 'nowrap'
   }
+
+  const tabOptions = [
+    { label: 'Todo', value: 0 },
+    { label: 'Gastos', value: 1 },
+    { label: 'Ingresos', value: 2 }
+  ]
 
   return (
     <main className="main">
@@ -161,11 +167,18 @@ export default function Transactions() {
           handleChangeFilters: (newFilters: Record<string, string>) => setFilters(newFilters)
         }}
       >
-        {!sideBarCollapsed && <h2 style={titleStyle}>Transacciones</h2>}
+        {!sideBarCollapsed && (
+          <header className="page-header">
+            <div>
+              <h2 className="page-title">Transacciones</h2>
+              <p className="page-subtitle">Gestiona tus ingresos y gastos</p>
+            </div>
+          </header>
+        )}
         <Suspense fallback={<CircularProgress />}>
           <div>
             {isMobile && (
-              <div style={buttonsStyle}>
+              <div style={{ ...buttonsStyle, marginBottom: 12 }}>
                 <MonthRangePicker
                   monthsSelected={monthsSelected}
                   setMonthsSelected={setMonthsSelected}
@@ -182,17 +195,13 @@ export default function Transactions() {
               </div>
             )}
             <div style={tabsStyle}>
-              <Tabs
-                textColor="secondary"
-                indicatorColor="secondary"
+              <PillTabs
+                options={tabOptions}
                 value={value}
                 onChange={handleChangeTab}
-                variant={isMobile ? 'fullWidth' : 'standard'}
-              >
-                <Tab classes={{ selected: 'tabSelected' }} label="Todo" value={0} />
-                <Tab classes={{ selected: 'tabSelected' }} label="Gastos" value={1} />
-                <Tab classes={{ selected: 'tabSelected' }} label="Ingresos" value={2} />
-              </Tabs>
+                fullWidth={isMobile}
+                ariaLabel="Filtro de tipo de transacción"
+              />
               {!isMobile && (
                 <div style={buttonsStyle}>
                   <MonthRangePicker

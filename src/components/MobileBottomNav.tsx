@@ -5,70 +5,96 @@ import {
   Home,
   Settings
 } from '@mui/icons-material'
-import { BottomNavigation, BottomNavigationAction, Paper, useTheme as useMuiTheme } from '@mui/material'
-import { usePathname, useRouter } from 'next/navigation'
+import { Box, useTheme as useMuiTheme } from '@mui/material'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 const ROUTES = [
-  { label: 'Inicio', icon: <Home />, value: '/' },
-  { label: 'Transacciones', icon: <CurrencyExchange />, value: '/transactions' },
-  { label: 'Presupuesto', icon: <Calculate />, value: '/budget' },
-  { label: 'Ajustes', icon: <Settings />, value: '/settings' }
+  { label: 'Inicio', icon: Home, value: '/' },
+  { label: 'Transacciones', icon: CurrencyExchange, value: '/transactions' },
+  { label: 'Presupuesto', icon: Calculate, value: '/budget' },
+  { label: 'Ajustes', icon: Settings, value: '/settings' }
 ]
 
 export default function MobileBottomNav() {
   const pathname = usePathname()
-  const router = useRouter()
   const theme = useMuiTheme()
   const isDark = theme.palette.mode === 'dark'
 
-  const value = ROUTES.find(r => r.value === pathname)?.value ?? '/'
-
   return (
-    <Paper
-      elevation={8}
+    <Box
+      role="navigation"
+      aria-label="Navegación principal"
       sx={{
         position: 'fixed',
         bottom: 0,
         left: 0,
         right: 0,
         zIndex: theme.zIndex.appBar,
-        display: { xs: 'block', md: 'none' },
-        backgroundColor: isDark ? '#1e1e1e' : '#fff',
-        borderTop: `1px solid ${isDark ? '#333' : '#e0e0e0'}`,
+        display: { xs: 'flex', md: 'none' },
+        justifyContent: 'center',
+        backgroundColor: isDark ? 'rgba(26, 26, 28, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+        backdropFilter: 'saturate(180%) blur(12px)',
+        WebkitBackdropFilter: 'saturate(180%) blur(12px)',
+        borderTop: '1px solid var(--border-color)',
         paddingBottom: 'env(safe-area-inset-bottom)'
       }}
-      role="navigation"
-      aria-label="Navegación principal"
     >
-      <BottomNavigation
-        value={value}
-        onChange={(_, newValue) => router.push(newValue as string)}
-        showLabels
+      <Box
+        component="ul"
         sx={{
-          backgroundColor: 'transparent',
-          height: 64,
-          '& .Mui-selected': { color: '#257CA3' }
+          display: 'flex',
+          listStyle: 'none',
+          width: '100%',
+          maxWidth: 480,
+          m: 0,
+          px: 1,
+          py: 0.75,
+          gap: 0.5
         }}
       >
-        {ROUTES.map(route => (
-          <BottomNavigationAction
-            key={route.value}
-            label={route.label}
-            value={route.value}
-            icon={route.icon}
-            aria-label={route.label}
-            sx={{
-              minWidth: 'auto',
-              padding: '6px 8px',
-              color: isDark ? '#b0b0b0' : '#666',
-              '& .MuiBottomNavigationAction-label': {
-                fontSize: 11,
-                '&.Mui-selected': { fontSize: 12 }
-              }
-            }}
-          />
-        ))}
-      </BottomNavigation>
-    </Paper>
+        {ROUTES.map(({ label, icon: Icon, value }) => {
+          const active = pathname === value
+          return (
+            <li key={value} style={{ flex: 1 }}>
+              <Link
+                href={value}
+                aria-label={label}
+                aria-current={active ? 'page' : undefined}
+                style={{ textDecoration: 'none' }}
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 0.25,
+                    py: 0.75,
+                    borderRadius: 2.5,
+                    color: active ? 'var(--brand)' : 'var(--text-secondary)',
+                    backgroundColor: active ? 'var(--brand-soft)' : 'transparent',
+                    transition: 'background-color .15s, color .15s',
+                    minHeight: 48
+                  }}
+                >
+                  <Icon sx={{ fontSize: 22 }} />
+                  <Box
+                    component="span"
+                    sx={{
+                      fontSize: 11,
+                      fontWeight: active ? 700 : 500,
+                      letterSpacing: 0
+                    }}
+                  >
+                    {label}
+                  </Box>
+                </Box>
+              </Link>
+            </li>
+          )
+        })}
+      </Box>
+    </Box>
   )
 }

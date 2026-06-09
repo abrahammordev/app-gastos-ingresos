@@ -1,9 +1,10 @@
 /* eslint-disable no-unused-vars */
 import { TransactionsContext } from '@/contexts/TransactionsContext'
 import { ITransaction } from '@/types/index'
-import { Delete, Edit } from '@mui/icons-material'
+import { Delete, Edit, ReceiptLong } from '@mui/icons-material'
 import { IconButton, useMediaQuery } from '@mui/material'
 import { ReactNode, useContext, useEffect, useRef, useState } from 'react'
+import EmptyState from '../EmptyState'
 import OneTransactionCard from '../card/OneTransactionCard'
 import BasicTable from './BasicTable'
 import { TablePagination } from './TablePagination'
@@ -83,6 +84,16 @@ export default function TransactionsTable({
       setRows(data)
     }
   }, [transactions])
+
+  if (rows.length === 0) {
+    return (
+      <EmptyState
+        icon={<ReceiptLong sx={{ fontSize: 28 }} />}
+        title="No hay transacciones en este periodo"
+        description="Añade tu primera transacción con el botón +, o cambia el rango de fechas."
+      />
+    )
+  }
 
   return (
     <>

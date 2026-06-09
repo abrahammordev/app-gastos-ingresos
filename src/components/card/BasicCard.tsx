@@ -13,20 +13,22 @@ export default function BasicCard({ children, style, ariaLabel, noPadding }: Bas
   return (
     <Card
       aria-label={ariaLabel}
+      elevation={0}
+      style={{ maxWidth: '100%', boxSizing: 'border-box', ...style }} // ← aquí
       sx={{
-        ...style,
-        borderRadius: 2,
+        borderRadius: 3,
         backgroundColor: 'var(--bg-card)',
         color: 'var(--text-primary)',
         border: '1px solid var(--border-color)',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)',
-        transition: 'box-shadow 0.2s ease, transform 0.2s ease',
+        boxShadow: 'none',
+        transition: 'border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease',
         '&:hover': {
-          boxShadow: '0 2px 4px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.06)'
+          borderColor: 'rgba(74, 154, 190, 0.35)',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.02), 0 6px 20px rgba(15, 23, 42, 0.06)'
         }
       }}
     >
-      <CardContent sx={noPadding ? { p: 0, '&:last-child': { pb: 0 } } : undefined}>
+      <CardContent sx={noPadding ? { p: 0, '&:last-child': { pb: 0 } } : { p: 2, '&:last-child': { pb: 2 } }}>
         {children}
       </CardContent>
     </Card>

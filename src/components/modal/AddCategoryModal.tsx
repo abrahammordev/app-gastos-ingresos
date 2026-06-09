@@ -1,5 +1,6 @@
 import { RefreshContext } from '@/contexts/RefreshContext'
 import { SettingsCategoriesContext } from '@/contexts/SettingsCategoriesContext'
+import { useToast } from '@/contexts/ToastContext'
 import useFetch from '@/hooks/useFetch'
 import { ICategories } from '@/types/index'
 import customFetch from '@/utils/fetchWrapper'
@@ -15,6 +16,7 @@ export interface AddCategoryModalProps {
 export default function AddCategoryModal({ open, handleClose }: AddCategoryModalProps) {
   const inputRef = useRef<HTMLInputElement>()
   const theme = useMuiTheme()
+  const toast = useToast()
 
   const isMobile = useMediaQuery('(max-width: 600px)')
   const [category, setCategory] = useState<string>('')
@@ -83,11 +85,17 @@ export default function AddCategoryModal({ open, handleClose }: AddCategoryModal
         if (refreshCategories) {
           refreshCategories()
         }
+        toast.success('Categoría creada')
         setLoading(false)
-        handleResetModal(false)
+        handleResetModal(true)
+      } else {
+        toast.error('No se pudo crear la categoría')
+        setLoading(false)
       }
     } catch (error) {
       console.error(error)
+      toast.error('Error de red al crear la categoría')
+      setLoading(false)
     }
   }
 

@@ -1,4 +1,5 @@
 import { SettingsBudgetsContext } from '@/contexts/SettingsBudgetsContext'
+import { useToast } from '@/contexts/ToastContext'
 import { IBudget } from '@/types/index'
 import customFetch from '@/utils/fetchWrapper'
 import { Button, TextField, useMediaQuery } from '@mui/material'
@@ -13,6 +14,7 @@ export interface EditCategoryBudgetModalProps {
 
 export default function EditCategoryBudgetModal({ open, handleClose, categoryBudget }: EditCategoryBudgetModalProps) {
   const inputRef = useRef<HTMLInputElement>()
+  const toast = useToast()
 
   const isMobile = useMediaQuery('(max-width: 600px)')
   const [category, setCategory] = useState('')
@@ -85,10 +87,14 @@ export default function EditCategoryBudgetModal({ open, handleClose, categoryBud
 
       if (response.ok) {
         refreshBudgets(sortBy, sortOrder, filters)
+        toast.success('Presupuesto actualizado')
         handleResetModal()
+      } else {
+        toast.error('No se pudo actualizar el presupuesto')
       }
     } catch (error) {
       console.error('Failed to update budget', error)
+      toast.error('Error de red al actualizar el presupuesto')
     }
 
     setLoading(false)

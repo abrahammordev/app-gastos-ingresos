@@ -1,5 +1,6 @@
 import { RefreshContext } from '@/contexts/RefreshContext'
 import { SettingsBudgetsContext } from '@/contexts/SettingsBudgetsContext'
+import { useToast } from '@/contexts/ToastContext'
 import { ICategories, ICategory } from '@/types/index'
 import customFetch from '@/utils/fetchWrapper'
 import { Autocomplete, Button, TextField, createFilterOptions, useMediaQuery, useTheme as useMuiTheme } from '@mui/material'
@@ -21,6 +22,7 @@ const filter = createFilterOptions<CategoryType>()
 export default function AddCategoryBudgetModal({ open, handleClose }: AddCategoryBudgetModalProps) {
   const inputRef = useRef<HTMLInputElement>()
   const theme = useMuiTheme()
+  const toast = useToast()
 
   const isMobile = useMediaQuery('(max-width: 600px)')
   const [category, setCategory] = useState<CategoryType>({ title: '' })
@@ -128,9 +130,11 @@ export default function AddCategoryBudgetModal({ open, handleClose }: AddCategor
         refreshCategories()
       }
       refreshBudgets(sortBy, sortOrder, filters)
-      handleResetModal(false)
+      toast.success('Presupuesto añadido')
+      handleResetModal(true)
     } else {
       setError({ ...error, message: 'Error al guardar el presupuesto.' })
+      toast.error('No se pudo guardar el presupuesto')
     }
 
     setLoading(false)
