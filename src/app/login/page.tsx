@@ -35,7 +35,7 @@ export default function LoginPage() {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '100vh',
+        minHeight: 'var(--app-height)',
         width: '100vw',
         backgroundColor: '#F7F9FB'
       }}

@@ -1,5 +1,5 @@
 import ClientLayout from '@/components/ClientLayout'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { ReactNode } from 'react'
 import './globals.css'
 
@@ -12,6 +12,12 @@ export const metadata: Metadata = {
       href: '/images/file.png',
     }
   ],
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover'
 }
 
 // Aplica .dark ANTES del primer paint para evitar FOUC.

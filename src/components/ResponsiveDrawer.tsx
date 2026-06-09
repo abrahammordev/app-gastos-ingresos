@@ -92,7 +92,7 @@ export default function ResponsiveDrawer({
   const drawer = (
     <Box
       sx={{
-        height: '100%',
+        height: 'var(--app-height)',
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: 'var(--bg-card)',
@@ -186,7 +186,7 @@ export default function ResponsiveDrawer({
       </Box>
 
       {/* Footer */}
-      <Box sx={{ borderTop: '1px solid var(--border-color)', p: 1.5, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+      <Box sx={{ borderTop: '1px solid var(--border-color)', p: 1.5, pb: 'calc(12px + env(safe-area-inset-bottom))', display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         <Box
           sx={{
             display: 'flex',
@@ -254,7 +254,7 @@ export default function ResponsiveDrawer({
         {isLogin ? (
           children
         ) : (
-          <Box sx={{ display: 'flex' }}>
+          <Box sx={{ display: 'flex', minHeight: 'var(--app-height)' }}>
             <CssBaseline />
             <AppBar
               position="fixed"
@@ -332,7 +332,7 @@ export default function ResponsiveDrawer({
                 width: { md: `calc(100% - ${drawerWidth}px)` },
                 backgroundColor: 'var(--bg-main)',
                 color: 'var(--text-primary)',
-                minHeight: '100vh'
+                minHeight: 'var(--app-height)'
               }}
             >
               <Toolbar sx={{ display: { xs: 'block', sm: 'block', md: 'none' }, minHeight: 56 }} />
@@ -344,7 +344,7 @@ export default function ResponsiveDrawer({
                 sx={{
                   position: 'fixed',
                   right: { xs: 16, md: 24 },
-                  bottom: { xs: 88, md: 24 }
+                  bottom: { xs: 'calc(88px + env(safe-area-inset-bottom))', md: 24 }
                 }}
                 color="primary"
                 onClick={() => setAddTransaction(true)}
